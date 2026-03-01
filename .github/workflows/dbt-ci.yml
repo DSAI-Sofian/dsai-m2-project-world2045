@@ -32,15 +32,21 @@ jobs:
           mkdir -p "${DBT_PROFILES_DIR}"
           printf '%s' "${{ secrets.DBT_PROFILES_YML }}" > "${DBT_PROFILES_DIR}/profiles.yml"
 
-      - name: Write GCP service account key
+      - name: Write & validate GCP service account key
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p /home/runner/work/_temp
+
           cat > /home/runner/work/_temp/gcp-sa.json <<'EOF'
 ${{ secrets.GCP_SA_KEY }}
 EOF
 
+          # Normalize potential CRLF line endings
+          tr -d '\r' < /home/runner/work/_temp/gcp-sa.json > /home/runner/work/_temp/gcp-sa.clean.json
+          mv /home/runner/work/_temp/gcp-sa.clean.json /home/runner/work/_temp/gcp-sa.json
+
+          # Validate JSON
           python - <<'PY'
 import json
 p="/home/runner/work/_temp/gcp-sa.json"
@@ -48,13 +54,6 @@ with open(p,"r",encoding="utf-8") as f:
     json.load(f)
 print("Service account JSON validated")
 PY
-
-      - name: Debug workspace
-        run: |
-          pwd
-          ls -la
-          ls -la dbt || true
-          ls -la dbt/dbt_project.yml || true
 
       - name: Assert dbt project exists
         run: |
