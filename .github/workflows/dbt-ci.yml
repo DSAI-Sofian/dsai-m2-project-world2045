@@ -11,8 +11,6 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      # Keep defaults simple and deterministic
-      DBT_PROJECT_DIR: dbt
       DBT_PROFILES_DIR: ${{ github.workspace }}/.dbt
 
     steps:
@@ -30,7 +28,6 @@ jobs:
           pip install "dbt-bigquery==1.8.*"
 
       - name: Write dbt profiles.yml from secret
-        # Use printf to preserve multiline YAML exactly
         run: |
           mkdir -p "${DBT_PROFILES_DIR}"
           printf '%s' "${{ secrets.DBT_PROFILES_YML }}" > "${DBT_PROFILES_DIR}/profiles.yml"
@@ -39,24 +36,22 @@ jobs:
         run: |
           pwd
           ls -la
-          echo "DBT_PROJECT_DIR=${DBT_PROJECT_DIR}"
-          echo "DBT_PROFILES_DIR=${DBT_PROFILES_DIR}"
-          ls -la "${DBT_PROJECT_DIR}" || true
-          find "${DBT_PROJECT_DIR}" -maxdepth 2 -type f -print || true
+          ls -la dbt || true
+          ls -la dbt/dbt_project.yml || true
 
       - name: Assert dbt project exists
         run: |
-          test -d "${DBT_PROJECT_DIR}" || (echo "Missing DBT_PROJECT_DIR: ${DBT_PROJECT_DIR}" && exit 1)
-          test -f "${DBT_PROJECT_DIR}/dbt_project.yml" || (echo "Missing ${DBT_PROJECT_DIR}/dbt_project.yml" && exit 1)
+          test -d dbt || (echo "dbt/ missing" && exit 1)
+          test -f dbt/dbt_project.yml || (echo "dbt_project.yml missing" && exit 1)
 
       - name: dbt deps
-        working-directory: ${{ env.DBT_PROJECT_DIR }}
+        working-directory: dbt
         run: dbt deps
 
       - name: dbt debug
-        working-directory: ${{ env.DBT_PROJECT_DIR }}
+        working-directory: dbt
         run: dbt debug
 
       - name: dbt build
-        working-directory: ${{ env.DBT_PROJECT_DIR }}
+        working-directory: dbt
         run: dbt build
