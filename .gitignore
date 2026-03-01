@@ -30,7 +30,6 @@ htmlcov/
 
 # --- Jupyter ---
 *.ipynb
-# If you DO want to version notebooks, remove the line above and ignore only outputs instead.
 
 # --- Logs / temp ---
 *.log
