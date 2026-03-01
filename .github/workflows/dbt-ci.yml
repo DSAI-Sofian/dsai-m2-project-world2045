@@ -28,17 +28,16 @@ jobs:
           python -m pip install --upgrade pip
           pip install "dbt-bigquery==1.8.*"
 
-      - name: Write profiles.yml from secret
+      - name: Write dbt profiles.yml from secret
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p "${DBT_PROFILES_DIR}"
           printf '%s' "${{ secrets.DBT_PROFILES_YML }}" > "${DBT_PROFILES_DIR}/profiles.yml"
-
           echo "=== profiles.yml keyfile line ==="
           grep -n "keyfile" "${DBT_PROFILES_DIR}/profiles.yml" || true
 
-      - name: Decode keyfile from base64 + validate JSON
+      - name: Decode GCP key from base64 secret + validate JSON
         shell: bash
         run: |
           set -euo pipefail
@@ -47,7 +46,7 @@ jobs:
           # Fail fast if secret missing/empty
           test -n "${{ secrets.GCP_SA_KEY_B64 }}" || (echo "ERROR: GCP_SA_KEY_B64 secret missing/empty" && exit 1)
 
-          # Decode
+          # Decode base64 to JSON keyfile
           echo "${{ secrets.GCP_SA_KEY_B64 }}" | base64 -d > "${KEYFILE_PATH}"
 
           # Normalize CRLF
