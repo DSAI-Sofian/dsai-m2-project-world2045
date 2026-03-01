@@ -37,27 +37,27 @@ jobs:
           echo "=== profiles.yml keyfile line ==="
           grep -n "keyfile" "${DBT_PROFILES_DIR}/profiles.yml" || true
 
-      - name: Decode GCP key from base64 secret + validate JSON
+      - name: Decode keyfile from base64 secret + validate JSON
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p /home/runner/work/_temp
 
-          # Fail fast if secret missing/empty
+          echo "=== Secret presence check (length only) ==="
+          python - <<'PY'
+s = """${{ secrets.GCP_SA_KEY_B64 }}"""
+print("GCP_SA_KEY_B64 length =", len(s))
+PY
+
           test -n "${{ secrets.GCP_SA_KEY_B64 }}" || (echo "ERROR: GCP_SA_KEY_B64 secret missing/empty" && exit 1)
 
-          # Decode base64 to JSON keyfile
           echo "${{ secrets.GCP_SA_KEY_B64 }}" | base64 -d > "${KEYFILE_PATH}"
-
-          # Normalize CRLF
           tr -d '\r' < "${KEYFILE_PATH}" > "${KEYFILE_PATH}.clean"
           mv "${KEYFILE_PATH}.clean" "${KEYFILE_PATH}"
           chmod 600 "${KEYFILE_PATH}"
 
-          # Fail fast if empty
           test -s "${KEYFILE_PATH}" || (echo "ERROR: Decoded keyfile is empty (bad base64?)" && exit 1)
 
-          # Validate JSON
           python - <<'PY'
 import json
 p="/home/runner/work/_temp/gcp-sa.json"
