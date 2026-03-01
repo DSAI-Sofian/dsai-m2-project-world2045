@@ -1,10 +1,10 @@
 name: dbt CI
 
 on:
-  pull_request:
-    branches: ["main", "develop"]
   push:
     branches: ["main"]
+  pull_request:
+    branches: ["main", "develop"]
 
 jobs:
   dbt-build:
@@ -12,6 +12,7 @@ jobs:
 
     env:
       DBT_PROFILES_DIR: ${{ github.workspace }}/.dbt
+      KEYFILE_PATH: /home/runner/work/_temp/gcp-sa.json
 
     steps:
       - name: Checkout
@@ -27,61 +28,54 @@ jobs:
           python -m pip install --upgrade pip
           pip install "dbt-bigquery==1.8.*"
 
-      - name: Write & validate GCP service account key (base64)
-  shell: bash
-  run: |
-    set -euo pipefail
-    mkdir -p /home/runner/work/_temp
-    echo "${{ secrets.GCP_SA_KEY_B64 }}" | base64 -d > /home/runner/work/_temp/gcp-sa.json
+      - name: Write profiles.yml from secret
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "${DBT_PROFILES_DIR}"
+          printf '%s' "${{ secrets.DBT_PROFILES_YML }}" > "${DBT_PROFILES_DIR}/profiles.yml"
+          echo "profiles.yml written"
+          echo "--- keyfile line ---"
+          grep -n "keyfile" "${DBT_PROFILES_DIR}/profiles.yml" || true
 
-    python - <<'PY'
+      - name: Decode service account key (base64) + validate JSON
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /home/runner/work/_temp
+          echo "${{ secrets.GCP_SA_KEY_B64 }}" | base64 -d > "${KEYFILE_PATH}"
+          tr -d '\r' < "${KEYFILE_PATH}" > "${KEYFILE_PATH}.clean"
+          mv "${KEYFILE_PATH}.clean" "${KEYFILE_PATH}"
+          chmod 600 "${KEYFILE_PATH}"
+
+          python - <<'PY'
 import json
 p="/home/runner/work/_temp/gcp-sa.json"
-with open(p,"r",encoding="utf-8") as f:
+with open(p, "r", encoding="utf-8") as f:
     json.load(f)
-print("Service account JSON validated")
+print("Service account JSON: OK")
 PY
 
       - name: Assert dbt project exists
+        shell: bash
         run: |
-          test -d dbt || (echo "dbt/ missing" && exit 1)
-          test -f dbt/dbt_project.yml || (echo "dbt_project.yml missing" && exit 1)
+          set -euo pipefail
+          test -d dbt
+          test -f dbt/dbt_project.yml
+          echo "dbt project: OK"
 
       - name: dbt deps
         working-directory: dbt
         run: dbt deps
 
-- name: Inspect keyfile + profile wiring (safe)
-  shell: bash
-  run: |
-    set -euo pipefail
-
-    echo "=== keyfile exists? ==="
-    ls -lah /home/runner/work/_temp || true
-    ls -lah /home/runner/work/_temp/gcp-sa.json || true
-
-    echo "=== keyfile first 2 lines (whitespace visible) ==="
-    sed -n '1,2p' /home/runner/work/_temp/gcp-sa.json | cat -A
-
-    echo "=== keyfile sha256 (does not reveal content) ==="
-    sha256sum /home/runner/work/_temp/gcp-sa.json || true
-
-    echo "=== profiles.yml keyfile line ==="
-    grep -n "keyfile" "${DBT_PROFILES_DIR}/profiles.yml" || true
-
-    echo "=== JSON parse check (must PASS) ==="
-    python - <<'PY'
-import json
-p="/home/runner/work/_temp/gcp-sa.json"
-with open(p,"r",encoding="utf-8") as f:
-    json.load(f)
-print("JSON OK")
-PY
-
       - name: dbt debug
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ env.KEYFILE_PATH }}
         working-directory: dbt
         run: dbt debug
 
       - name: dbt build
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ env.KEYFILE_PATH }}
         working-directory: dbt
         run: dbt build
