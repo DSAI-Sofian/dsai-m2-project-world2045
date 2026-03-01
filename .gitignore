@@ -38,6 +38,7 @@ temp/
 .cache/
 
 # --- dbt ---
+# dbt local profile (never commit)
 dbt/profiles.yml
 dbt/target/
 dbt/dbt_packages/
@@ -72,3 +73,4 @@ infrastructure/**/.terraform/
 infrastructure/**/*.tfstate
 infrastructure/**/*.tfstate.*
 infrastructure/**/.terraform.lock.hcl
+dbt/profiles.yml
