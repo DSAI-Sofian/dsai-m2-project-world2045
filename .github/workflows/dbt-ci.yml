@@ -34,20 +34,31 @@ jobs:
           set -euo pipefail
           mkdir -p "${DBT_PROFILES_DIR}"
           printf '%s' "${{ secrets.DBT_PROFILES_YML }}" > "${DBT_PROFILES_DIR}/profiles.yml"
-          echo "profiles.yml written"
-          echo "--- keyfile line ---"
+
+          echo "=== profiles.yml keyfile line ==="
           grep -n "keyfile" "${DBT_PROFILES_DIR}/profiles.yml" || true
 
-      - name: Decode service account key (base64) + validate JSON
+      - name: Decode keyfile from base64 + validate JSON
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p /home/runner/work/_temp
+
+          # Fail fast if secret missing/empty
+          test -n "${{ secrets.GCP_SA_KEY_B64 }}" || (echo "ERROR: GCP_SA_KEY_B64 secret missing/empty" && exit 1)
+
+          # Decode
           echo "${{ secrets.GCP_SA_KEY_B64 }}" | base64 -d > "${KEYFILE_PATH}"
+
+          # Normalize CRLF
           tr -d '\r' < "${KEYFILE_PATH}" > "${KEYFILE_PATH}.clean"
           mv "${KEYFILE_PATH}.clean" "${KEYFILE_PATH}"
           chmod 600 "${KEYFILE_PATH}"
 
+          # Fail fast if empty
+          test -s "${KEYFILE_PATH}" || (echo "ERROR: Decoded keyfile is empty (bad base64?)" && exit 1)
+
+          # Validate JSON
           python - <<'PY'
 import json
 p="/home/runner/work/_temp/gcp-sa.json"
@@ -60,8 +71,8 @@ PY
         shell: bash
         run: |
           set -euo pipefail
-          test -d dbt
-          test -f dbt/dbt_project.yml
+          test -d dbt || (echo "ERROR: dbt/ directory missing" && exit 1)
+          test -f dbt/dbt_project.yml || (echo "ERROR: dbt/dbt_project.yml missing" && exit 1)
           echo "dbt project: OK"
 
       - name: dbt deps
