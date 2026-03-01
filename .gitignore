@@ -1,0 +1,74 @@
+# --- OS / Editor ---
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.vscode/
+.idea/
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+.eggs/
+dist/
+build/
+pip-wheel-metadata/
+.venv/
+venv/
+ENV/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.pytype/
+.ipynb_checkpoints/
+
+# --- Jupyter ---
+*.ipynb
+# If you DO want to version notebooks, remove the line above and ignore only outputs instead.
+
+# --- Logs / temp ---
+*.log
+tmp/
+temp/
+.cache/
+
+# --- dbt ---
+dbt/target/
+dbt/dbt_packages/
+dbt/logs/
+dbt/.user.yml
+
+# --- Data / secrets ---
+data/
+*.parquet
+*.csv
+*.tsv
+*.jsonl
+*.ndjson
+*.sqlite
+*.duckdb
+*.db
+*.zip
+*.gz
+
+# --- Credentials (never commit) ---
+.env
+.env.*
+*.pem
+*.key
+*.p12
+*.pfx
+*service-account*.json
+credentials*.json
+
+# --- Terraform (if used) ---
+infrastructure/**/.terraform/
+infrastructure/**/*.tfstate
+infrastructure/**/*.tfstate.*
+infrastructure/**/.terraform.lock.hcl
