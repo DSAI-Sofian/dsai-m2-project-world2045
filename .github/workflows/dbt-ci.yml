@@ -32,7 +32,6 @@ jobs:
   run: |
     set -euo pipefail
     mkdir -p /home/runner/work/_temp
-
     echo "${{ secrets.GCP_SA_KEY_B64 }}" | base64 -d > /home/runner/work/_temp/gcp-sa.json
 
     python - <<'PY'
