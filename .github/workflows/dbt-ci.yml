@@ -52,6 +52,33 @@ PY
         working-directory: dbt
         run: dbt deps
 
+- name: Inspect keyfile + profile wiring (safe)
+  shell: bash
+  run: |
+    set -euo pipefail
+
+    echo "=== keyfile exists? ==="
+    ls -lah /home/runner/work/_temp || true
+    ls -lah /home/runner/work/_temp/gcp-sa.json || true
+
+    echo "=== keyfile first 2 lines (whitespace visible) ==="
+    sed -n '1,2p' /home/runner/work/_temp/gcp-sa.json | cat -A
+
+    echo "=== keyfile sha256 (does not reveal content) ==="
+    sha256sum /home/runner/work/_temp/gcp-sa.json || true
+
+    echo "=== profiles.yml keyfile line ==="
+    grep -n "keyfile" "${DBT_PROFILES_DIR}/profiles.yml" || true
+
+    echo "=== JSON parse check (must PASS) ==="
+    python - <<'PY'
+import json
+p="/home/runner/work/_temp/gcp-sa.json"
+with open(p,"r",encoding="utf-8") as f:
+    json.load(f)
+print("JSON OK")
+PY
+
       - name: dbt debug
         working-directory: dbt
         run: dbt debug
