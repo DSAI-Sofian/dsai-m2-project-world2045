@@ -33,9 +33,21 @@ jobs:
           printf '%s' "${{ secrets.DBT_PROFILES_YML }}" > "${DBT_PROFILES_DIR}/profiles.yml"
 
       - name: Write GCP service account key
+        shell: bash
         run: |
+          set -euo pipefail
           mkdir -p /home/runner/work/_temp
-          printf '%s' "${{ secrets.GCP_SA_KEY }}" > /home/runner/work/_temp/gcp-sa.json
+          cat > /home/runner/work/_temp/gcp-sa.json <<'EOF'
+      ${{ secrets.GCP_SA_KEY }}
+      EOF
+
+          python - <<'PY'
+      import json
+      p="/home/runner/work/_temp/gcp-sa.json"
+      with open(p,"r",encoding="utf-8") as f:
+          json.load(f)
+      print("Service account JSON validated")
+      PY
 
       - name: Debug workspace
         run: |
