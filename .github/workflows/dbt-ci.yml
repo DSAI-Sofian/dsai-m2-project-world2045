@@ -27,27 +27,15 @@ jobs:
           python -m pip install --upgrade pip
           pip install "dbt-bigquery==1.8.*"
 
-      - name: Write dbt profiles.yml from secret
-        run: |
-          mkdir -p "${DBT_PROFILES_DIR}"
-          printf '%s' "${{ secrets.DBT_PROFILES_YML }}" > "${DBT_PROFILES_DIR}/profiles.yml"
+      - name: Write & validate GCP service account key (base64)
+  shell: bash
+  run: |
+    set -euo pipefail
+    mkdir -p /home/runner/work/_temp
 
-      - name: Write & validate GCP service account key
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p /home/runner/work/_temp
+    echo "${{ secrets.GCP_SA_KEY_B64 }}" | base64 -d > /home/runner/work/_temp/gcp-sa.json
 
-          cat > /home/runner/work/_temp/gcp-sa.json <<'EOF'
-${{ secrets.GCP_SA_KEY }}
-EOF
-
-          # Normalize potential CRLF line endings
-          tr -d '\r' < /home/runner/work/_temp/gcp-sa.json > /home/runner/work/_temp/gcp-sa.clean.json
-          mv /home/runner/work/_temp/gcp-sa.clean.json /home/runner/work/_temp/gcp-sa.json
-
-          # Validate JSON
-          python - <<'PY'
+    python - <<'PY'
 import json
 p="/home/runner/work/_temp/gcp-sa.json"
 with open(p,"r",encoding="utf-8") as f:
