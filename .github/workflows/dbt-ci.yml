@@ -38,16 +38,16 @@ jobs:
           set -euo pipefail
           mkdir -p /home/runner/work/_temp
           cat > /home/runner/work/_temp/gcp-sa.json <<'EOF'
-      ${{ secrets.GCP_SA_KEY }}
-      EOF
+${{ secrets.GCP_SA_KEY }}
+EOF
 
           python - <<'PY'
-      import json
-      p="/home/runner/work/_temp/gcp-sa.json"
-      with open(p,"r",encoding="utf-8") as f:
-          json.load(f)
-      print("Service account JSON validated")
-      PY
+import json
+p="/home/runner/work/_temp/gcp-sa.json"
+with open(p,"r",encoding="utf-8") as f:
+    json.load(f)
+print("Service account JSON validated")
+PY
 
       - name: Debug workspace
         run: |
