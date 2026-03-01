@@ -43,28 +43,31 @@ jobs:
           set -euo pipefail
           mkdir -p /home/runner/work/_temp
 
-          echo "=== Secret presence check (length only) ==="
-          python - <<'PY'
-s = """${{ secrets.GCP_SA_KEY_B64 }}"""
-print("GCP_SA_KEY_B64 length =", len(s))
-PY
+          # Fail fast if secret missing/empty
+          if [ -z "${{ secrets.GCP_SA_KEY_B64 }}" ]; then
+            echo "ERROR: GCP_SA_KEY_B64 secret missing/empty"
+            exit 1
+          fi
 
-          test -n "${{ secrets.GCP_SA_KEY_B64 }}" || (echo "ERROR: GCP_SA_KEY_B64 secret missing/empty" && exit 1)
-
+          # Decode base64 -> JSON keyfile
           echo "${{ secrets.GCP_SA_KEY_B64 }}" | base64 -d > "${KEYFILE_PATH}"
+
+          # Normalize CRLF just in case
           tr -d '\r' < "${KEYFILE_PATH}" > "${KEYFILE_PATH}.clean"
           mv "${KEYFILE_PATH}.clean" "${KEYFILE_PATH}"
           chmod 600 "${KEYFILE_PATH}"
 
-          test -s "${KEYFILE_PATH}" || (echo "ERROR: Decoded keyfile is empty (bad base64?)" && exit 1)
+          # Fail fast if decoded file empty
+          if [ ! -s "${KEYFILE_PATH}" ]; then
+            echo "ERROR: Decoded keyfile is empty (bad base64?)"
+            exit 1
+          fi
 
-          python - <<'PY'
-import json
-p="/home/runner/work/_temp/gcp-sa.json"
-with open(p, "r", encoding="utf-8") as f:
-    json.load(f)
-print("Service account JSON: OK")
-PY
+          # Print only file size (safe)
+          echo "Keyfile bytes: $(wc -c < "${KEYFILE_PATH}")"
+
+          # Validate JSON (fail if invalid)
+          python -c "import json; json.load(open('${KEYFILE_PATH}','r',encoding='utf-8')); print('Service account JSON: OK')"
 
       - name: Assert dbt project exists
         shell: bash
@@ -72,7 +75,6 @@ PY
           set -euo pipefail
           test -d dbt || (echo "ERROR: dbt/ directory missing" && exit 1)
           test -f dbt/dbt_project.yml || (echo "ERROR: dbt/dbt_project.yml missing" && exit 1)
-          echo "dbt project: OK"
 
       - name: dbt deps
         working-directory: dbt
