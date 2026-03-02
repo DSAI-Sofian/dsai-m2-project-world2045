@@ -13,6 +13,8 @@ jobs:
     env:
       DBT_PROFILES_DIR: ${{ github.workspace }}/.dbt
       KEYFILE_PATH: /home/runner/work/_temp/gcp-sa.json
+      DBT_TARGET: ci
+      DBT_DATASET: world2045_ci
 
     steps:
       - name: Checkout
@@ -78,16 +80,16 @@ jobs:
 
       - name: dbt deps
         working-directory: dbt
-        run: dbt deps
+        run: dbt deps --target "${DBT_TARGET}"
 
       - name: dbt debug
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ env.KEYFILE_PATH }}
         working-directory: dbt
-        run: dbt debug
+        run: dbt debug --target "${DBT_TARGET}"
 
       - name: dbt build
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ env.KEYFILE_PATH }}
         working-directory: dbt
-        run: dbt build
+        run: dbt build --target "${DBT_TARGET}"
