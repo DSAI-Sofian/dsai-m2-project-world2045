@@ -1,0 +1,26 @@
+version: 2
+
+sources:
+  - name: bronze_ref
+    database: project-93ce72dd-0a39-4d93-bf5
+    schema: bronze_ref
+    tables:
+      - name: country_code_map
+        description: >
+          Canonical country mapping table used to build dim_country.
+          Must include ISO3 and at least one display name.
+
+  # Optional placeholders for future phases (safe to leave; dbt won't query them yet)
+  - name: bronze_wdi
+    database: project-93ce72dd-0a39-4d93-bf5
+    schema: bronze_wdi
+    tables:
+      - name: wdi_indicators_country_year
+        description: "WDI normalized to country-year (future)."
+
+  - name: bronze_wpp
+    database: project-93ce72dd-0a39-4d93-bf5
+    schema: bronze_wpp
+    tables:
+      - name: wpp_country_year
+        description: "WPP country-year (future)."

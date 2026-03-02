@@ -1,0 +1,126 @@
+version: 2
+
+models:
+  - name: dim_country
+    description: >
+      Canonical country dimension (ISO-3166-1 alpha-3) built from the
+      `country_overrides` seed. In the single-dataset convention, this model is
+      materialized as `silver__dim_country` in the dataset defined by `DBT_DATASET`
+      (or `target.dataset` when DBT_DATASET is not set).
+    config:
+      contract:
+        enforced: true
+    columns:
+      - name: country_iso3
+        data_type: string
+        description: "ISO-3166-1 alpha-3 code (canonical PK)."
+        tests: [not_null, unique]
+
+      - name: country_name
+        data_type: string
+        description: "Primary display name."
+        tests: [not_null]
+
+      - name: country_name_official
+        data_type: string
+      - name: country_iso2
+        data_type: string
+      - name: country_numeric
+        data_type: string
+      - name: region
+        data_type: string
+      - name: subregion
+        data_type: string
+      - name: income_group
+        data_type: string
+
+      - name: is_sovereign
+        data_type: bool
+      - name: is_disputed
+        data_type: bool
+
+      - name: valid_from_year
+        data_type: int64
+      - name: valid_to_year
+        data_type: int64
+
+      - name: predecessor_iso3
+        data_type: string
+      - name: successor_iso3
+        data_type: string
+
+      - name: created_at
+        data_type: timestamp
+      - name: updated_at
+        data_type: timestamp
+
+  - name: dim_year
+    description: >
+      Year dimension from 1945 to 2100. Materialized as `silver__dim_year`
+      in the dataset defined by `DBT_DATASET` (or `target.dataset`).
+    config:
+      contract:
+        enforced: true
+    columns:
+      - name: year
+        data_type: int64
+        tests: [not_null, unique]
+
+      - name: decade
+        data_type: int64
+        tests: [not_null]
+
+      - name: post_ww2_flag
+        data_type: bool
+        tests: [not_null]
+
+      - name: created_at
+        data_type: timestamp
+      - name: updated_at
+        data_type: timestamp
+
+  - name: fact_country_year_spine
+    description: >
+      Canonical country-year spine containing all valid (country_iso3, year)
+      combinations. All conformed facts must left-join to this spine.
+      Materialized as `silver__fact_country_year_spine` in the dataset defined
+      by `DBT_DATASET` (or `target.dataset`).
+    config:
+      contract:
+        enforced: true
+    columns:
+      - name: country_iso3
+        data_type: string
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_country')
+              field: country_iso3
+
+      - name: year
+        data_type: int64
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_year')
+              field: year
+
+      - name: is_valid_entity_year
+        data_type: bool
+        tests: [not_null]
+
+      - name: created_at
+        data_type: timestamp
+      - name: updated_at
+        data_type: timestamp
+
+      - name: country_year_key
+        data_type: string
+        description: "Deterministic MD5 hash of country_iso3 + year."
+        tests:
+          - not_null
+          - unique
+
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: ['country_iso3', 'year']

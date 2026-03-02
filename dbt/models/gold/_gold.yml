@@ -1,0 +1,5 @@
+version: 2
+
+models:
+  - name: mart_world2045_features_country_year
+    description: "Minimal placeholder mart for Phase 0/1 CI validation."

@@ -7,8 +7,56 @@ profile: "world2045"
 model-paths: ["models"]
 test-paths: ["tests"]
 macro-paths: ["macros"]
+seed-paths: ["seeds"]
 
 target-path: "target"
 clean-targets:
   - "target"
   - "dbt_packages"
+
+vars:
+  constant_usd_base_year: 2021
+  year_start: 1945
+  year_end: 2100
+
+models:
+  world2045:
+    +persist_docs:
+      relation: true
+      columns: true
+    +on_schema_change: "append_new_columns"
+    +materialized: table
+
+    # Single-dataset convention, schema is controlled by env var:
+    # - In CI: DBT_DATASET=world2045_ci
+    # - In dev/prod: set DBT_DATASET accordingly (or falls back to target.dataset)
+    silver:
+      +schema: "{{ env_var('DBT_DATASET', target.dataset) }}"
+      +alias: "{{ 'silver__' ~ this.name }}"
+
+    gold:
+      +schema: "{{ env_var('DBT_DATASET', target.dataset) }}"
+      +alias: "{{ 'gold__' ~ this.name }}"
+
+seeds:
+  world2045:
+    +schema: "{{ env_var('DBT_DATASET', target.dataset) }}"
+    +quote_columns: false
+
+    country_overrides:
+      +enabled: true
+      +column_types:
+        iso3: string
+        country_name: string
+        country_name_official: string
+        iso2: string
+        iso_numeric: string
+        region: string
+        subregion: string
+        income_group: string
+        is_sovereign: bool
+        is_disputed: bool
+        valid_from_year: int64
+        valid_to_year: int64
+        predecessor_iso3: string
+        successor_iso3: string
