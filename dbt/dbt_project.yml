@@ -32,11 +32,11 @@ models:
     # - In dev/prod: set DBT_DATASET accordingly (or falls back to target.dataset)
     silver:
       +schema: "{{ env_var('DBT_DATASET', target.dataset) }}"
-      +alias: "{{ 'silver__' ~ this.name }}"
+      +alias: "{{ 'silver__' ~ model.name }}"
 
     gold:
       +schema: "{{ env_var('DBT_DATASET', target.dataset) }}"
-      +alias: "{{ 'gold__' ~ this.name }}"
+      +alias: "{{ 'gold__' ~ model.name }}"
 
 seeds:
   world2045:
