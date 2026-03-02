@@ -1,136 +1,69 @@
-# World in 2045 (Module 2) — Data Engineering + Forecasting
+# 🌍 World in 2045 -- Data Engineering Blueprint
 
-This repository contains the end-to-end data engineering and analytics workflow to answer:
+## Overview
 
-> **What does the world look like in 2045?**
+This project answers the question:
 
-It implements a reproducible pipeline:
-- **Bronze**: raw ingestion (immutable)
-- **Silver**: conformed, cleaned, standardized (Country-Year contract)
-- **Gold**: analytics-ready marts and forecast features
-- **dbt**: transformations + tests + documentation
+**"What will the world look like in 2045?"**
 
----
+Using a strictly data-driven methodology:
 
-## Repository Structure
-world-in-2045/
+1.  Analyse historical post--World War II data\
+2.  Model structural global trends\
+3.  Project forward to 2045\
+4.  Identify positive growth levers and structural risks
 
-├── src/world2045/ # Python ingestion + utilities
+------------------------------------------------------------------------
 
-├── dbt/ # dbt project (models, tests, macros)
+## Platform Architecture
 
-├── data_contracts/ # transformation contracts (schema specs)
+-   **Google BigQuery** -- Data warehouse\
+-   **dbt Core (v1.11+)** -- Transformations and testing\
+-   **GitHub Actions** -- Continuous Integration\
+-   **Single-dataset convention** -- Controlled via environment variable
+    `DBT_DATASET`
 
-├── docs/ # blueprint + notes
+------------------------------------------------------------------------
 
-└── infrastructure/ # IaC (optional: Terraform)
+## Logical Data Layers
 
----
+All project tables live in one dataset and are logically separated by
+naming prefix:
 
-## Prerequisites
+  Layer    Prefix
+  -------- -------------
+  Silver   `silver__*`
+  Gold     `gold__*`
 
-- Python 3.11+
-- dbt (adapter depends on warehouse)
-  - BigQuery: `dbt-bigquery`
-- Google Cloud authentication (ADC recommended)
+Example:
 
----
+world2045_ci.silver\_\_dim_country\
+world2045_ci.silver\_\_fact_country_year_spine\
+world2045_ci.gold\_\_mart_world2045_features_country_year
 
-## Quickstart
+------------------------------------------------------------------------
 
-### 1) Create environment
+## Phase 0 -- Foundations (Completed)
 
-```bash
-python -m venv .venv
-# Windows:
-# .venv\Scripts\activate
-# macOS/Linux:
-source .venv/bin/activate
+-   Implemented ISO3 canonical seed (`country_overrides`)
+-   Built `dim_country` and `dim_year`
+-   Built `fact_country_year_spine`
+-   Enforced dbt contracts + tests
+-   Implemented naming macros for dataset routing
+-   Configured CI pipeline (dbt deps, seed, build)
 
-pip install -U pip
-pip install -r requirements.txt
-```
+------------------------------------------------------------------------
 
-## 2) Configure dbt profile
+## Running Locally
 
-```yaml
-world2045:
-  target: dev
-  outputs:
-    dev:
-      type: bigquery
-      method: oauth
-      project: YOUR_GCP_PROJECT_ID
-      dataset: world2045_dev
-      threads: 4
-      location: US
-```
+cd dbt\
+dbt deps\
+dbt seed --target ci\
+dbt build --target ci
 
-## 3) GitHub Actions YAML for dbt CI
+------------------------------------------------------------------------
 
-This is a **minimal** CI that:
-- installs Python + dbt adapter
-- writes a dbt profile from GitHub Secrets
-- runs `dbt deps` and `dbt build`
+## Next Phase
 
-### Required GitHub Secrets (recommended)
-Create these in **Repo → Settings → Secrets and variables → Actions**:
-- `DBT_PROFILES_YML` (full contents of `profiles.yml`)
-- Optionally: `DBT_PROJECT_DIR` (default `dbt` if omitted)
-
-> This avoids committing credentials and avoids trying to use local `~/.dbt/profiles.yml`.
-
-Create: `.github/workflows/dbt-ci.yml`
-
-```yaml
-```yaml
-name: dbt CI
-
-on:
-  pull_request:
-    branches: [ "main", "develop" ]
-  push:
-    branches: [ "main" ]
-
-jobs:
-  dbt-build:
-    runs-on: ubuntu-latest
-
-    env:
-      DBT_PROJECT_DIR: ${{ secrets.DBT_PROJECT_DIR || 'dbt' }}
-      DBT_PROFILES_DIR: ${{ github.workspace }}/.dbt
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-
-      - name: Install dbt
-        run: |
-          python -m pip install --upgrade pip
-          # Choose ONE adapter. BigQuery example:
-          pip install "dbt-bigquery==1.8.*"
-
-      - name: Write dbt profiles.yml from secret
-        run: |
-          mkdir -p "${DBT_PROFILES_DIR}"
-          echo "${{ secrets.DBT_PROFILES_YML }}" > "${DBT_PROFILES_DIR}/profiles.yml"
-
-      - name: dbt deps
-        working-directory: ${{ env.DBT_PROJECT_DIR }}
-        run: dbt deps
-
-      - name: dbt debug
-        working-directory: ${{ env.DBT_PROJECT_DIR }}
-        run: dbt debug
-
-      - name: dbt build
-        working-directory: ${{ env.DBT_PROJECT_DIR }}
-        run: dbt build
-```
-
-## 4) Initialize repo
+Phase 1 introduces backbone datasets (WDI, WPP) and first conformed
+facts.
