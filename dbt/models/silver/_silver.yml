@@ -94,16 +94,18 @@ models:
         tests:
           - not_null
           - relationships:
-              to: ref('dim_country')
-              field: country_iso3
+              arguments:
+                to: ref('dim_country')
+                field: country_iso3
 
       - name: year
         data_type: int64
         tests:
           - not_null
           - relationships:
-              to: ref('dim_year')
-              field: year
+              arguments:
+                to: ref('dim_year')
+                field: year
 
       - name: is_valid_entity_year
         data_type: bool
