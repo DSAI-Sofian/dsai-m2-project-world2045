@@ -1,0 +1,3 @@
+iso3,country_name,country_name_official,iso2,iso_numeric,region,subregion,income_group,is_sovereign,is_disputed,valid_from_year,valid_to_year,predecessor_iso3,successor_iso3
+USA,United States,United States of America,US,840,Americas,Northern America,High income,true,false,,,
+SGP,Singapore,Republic of Singapore,SG,702,Asia,South-eastern Asia,High income,true,false,,,
