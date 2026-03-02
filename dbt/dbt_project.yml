@@ -27,17 +27,6 @@ models:
     +on_schema_change: "append_new_columns"
     +materialized: table
 
-    # Single-dataset convention, schema is controlled by env var:
-    # - In CI: DBT_DATASET=world2045_ci
-    # - In dev/prod: set DBT_DATASET accordingly (or falls back to target.dataset)
-    silver:
-      +schema: "{{ env_var('DBT_DATASET', target.dataset) }}"
-      +alias: "{{ 'silver__' ~ model.name }}"
-
-    gold:
-      +schema: "{{ env_var('DBT_DATASET', target.dataset) }}"
-      +alias: "{{ 'gold__' ~ model.name }}"
-
 seeds:
   world2045:
     +schema: "{{ env_var('DBT_DATASET', target.dataset) }}"
