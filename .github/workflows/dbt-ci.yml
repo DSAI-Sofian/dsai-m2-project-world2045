@@ -89,6 +89,12 @@ jobs:
         working-directory: dbt
         run: dbt debug --target "${DBT_TARGET}"
 
+      - name: dbt seed
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ env.KEYFILE_PATH }}
+        working-directory: dbt
+        run: dbt seed --target "${DBT_TARGET}"
+
       - name: dbt build
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ env.KEYFILE_PATH }}
