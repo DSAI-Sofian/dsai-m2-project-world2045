@@ -9,13 +9,25 @@
   {% if custom_alias_name is not none %}
     {{ custom_alias_name }}
   {% else %}
-    {# Prefix based on model folder (logical layer) #}
+    {# Prefix based on model folder (logical layer), but avoid double-prefixing #}
+    {% set name = node.name %}
+
     {% if node.path.startswith('silver/') %}
-      {{ 'silver__' ~ node.name }}
+      {% if name.startswith('silver__') %}
+        {{ name }}
+      {% else %}
+        {{ 'silver__' ~ name }}
+      {% endif %}
+
     {% elif node.path.startswith('gold/') %}
-      {{ 'gold__' ~ node.name }}
+      {% if name.startswith('gold__') %}
+        {{ name }}
+      {% else %}
+        {{ 'gold__' ~ name }}
+      {% endif %}
+
     {% else %}
-      {{ node.name }}
+      {{ name }}
     {% endif %}
   {% endif %}
 {%- endmacro %}
