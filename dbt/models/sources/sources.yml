@@ -1,5 +1,6 @@
 version: 2
 
+sources:
   - name: world-development-indicators
     schema: "{{ env_var('DBT_DATASET', 'world2045_ci') }}"
     tables:

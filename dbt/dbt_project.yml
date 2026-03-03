@@ -25,23 +25,18 @@ models:
       relation: true
       columns: true
 
-    # Safer default at scale: allow new cols but don't silently mutate types
+    # Global defaults
+    +materialized: table
     +on_schema_change: "sync_all_columns"
 
-    # Keep table as a project-wide default, but override for facts below
-    +materialized: table
-
-    # -----------------------------
-    # SILVER LAYER DEFAULTS
-    # -----------------------------
+    # Single-dataset convention (Option B)
     silver:
       +schema: "{{ env_var('DBT_DATASET', 'world2045_ci') }}"
 
-      # Defaults for large conformed country-year facts (wide tables)
       facts:
         +materialized: incremental
         +incremental_strategy: merge
-        +unique_key: ["iso3", "year"]
+        +unique_key: ["country_iso3", "year"]
         +partition_by:
           field: year
           data_type: int64
@@ -49,14 +44,14 @@ models:
             start: 1950
             end: 2101
             interval: 1
-        +cluster_by: ["iso3"]
-        +on_schema_change: "sync_all_columns"
+        +cluster_by: ["country_iso3"]
+        # REQUIRED when incremental + contracts enforced
+        +on_schema_change: "append_new_columns"
 
-      # Defaults for long/narrow indicator tables (iso3-year-indicator-value)
       indicators:
         +materialized: incremental
         +incremental_strategy: merge
-        +unique_key: ["iso3", "year", "indicator"]
+        +unique_key: ["country_iso3", "year", "indicator"]
         +partition_by:
           field: year
           data_type: int64
@@ -64,16 +59,14 @@ models:
             start: 1950
             end: 2101
             interval: 1
-        +cluster_by: ["iso3", "indicator"]
-        +on_schema_change: "sync_all_columns"
+        +cluster_by: ["country_iso3", "indicator"]
+        # REQUIRED when incremental + contracts enforced
+        +on_schema_change: "append_new_columns"
 
-    # -----------------------------
-    # GOLD LAYER DEFAULTS (optional now)
-    # -----------------------------
     gold:
       +schema: "{{ env_var('DBT_DATASET', 'world2045_ci') }}"
       +materialized: table
-      +cluster_by: ["iso3"]
+      +cluster_by: ["country_iso3"]
 
 seeds:
   world2045:
