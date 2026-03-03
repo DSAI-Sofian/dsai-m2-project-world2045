@@ -24,12 +24,60 @@ models:
     +persist_docs:
       relation: true
       columns: true
-    +on_schema_change: "append_new_columns"
+
+    # Safer default at scale: allow new cols but don't silently mutate types
+    +on_schema_change: "sync_all_columns"
+
+    # Keep table as a project-wide default, but override for facts below
     +materialized: table
+
+    # -----------------------------
+    # SILVER LAYER DEFAULTS
+    # -----------------------------
+    silver:
+      +schema: "{{ env_var('DBT_DATASET', 'world2045_ci') }}"
+
+      # Defaults for large conformed country-year facts (wide tables)
+      facts:
+        +materialized: incremental
+        +incremental_strategy: merge
+        +unique_key: ["iso3", "year"]
+        +partition_by:
+          field: year
+          data_type: int64
+          range:
+            start: 1950
+            end: 2101
+            interval: 1
+        +cluster_by: ["iso3"]
+        +on_schema_change: "sync_all_columns"
+
+      # Defaults for long/narrow indicator tables (iso3-year-indicator-value)
+      indicators:
+        +materialized: incremental
+        +incremental_strategy: merge
+        +unique_key: ["iso3", "year", "indicator"]
+        +partition_by:
+          field: year
+          data_type: int64
+          range:
+            start: 1950
+            end: 2101
+            interval: 1
+        +cluster_by: ["iso3", "indicator"]
+        +on_schema_change: "sync_all_columns"
+
+    # -----------------------------
+    # GOLD LAYER DEFAULTS (optional now)
+    # -----------------------------
+    gold:
+      +schema: "{{ env_var('DBT_DATASET', 'world2045_ci') }}"
+      +materialized: table
+      +cluster_by: ["iso3"]
 
 seeds:
   world2045:
-    +schema: "{{ env_var('DBT_DATASET', target.dataset) }}"
+    +schema: "{{ env_var('DBT_DATASET', 'world2045_ci') }}"
     +quote_columns: false
 
     country_overrides:
