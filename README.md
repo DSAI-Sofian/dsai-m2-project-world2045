@@ -1,69 +1,51 @@
-# 🌍 World in 2045 -- Data Engineering Blueprint
+# World in 2045
 
-## Overview
+A data‑engineering project that builds a reproducible analytics pipeline to model global development trajectories toward the year 2045.
 
-This project answers the question:
+## Objectives
+- Construct a modern data platform using real-world datasets.
+- Model historical development trends.
+- Produce scenario-driven projections.
 
-**"What will the world look like in 2045?"**
+## Technology Stack
 
-Using a strictly data-driven methodology:
+| Layer | Technology |
+|------|------------|
+| Storage | BigQuery |
+| Transformation | dbt |
+| CI/CD | GitHub Actions |
+| Orchestration | Python pipelines |
+| Version Control | Git + GitHub |
 
-1.  Analyse historical post--World War II data\
-2.  Model structural global trends\
-3.  Project forward to 2045\
-4.  Identify positive growth levers and structural risks
+## Architecture Overview
 
-------------------------------------------------------------------------
+Raw datasets are ingested into **Bronze** tables, normalized into **Silver** analytical datasets, and aggregated into **Gold** feature marts.
 
-## Platform Architecture
+## Current Status
 
--   **Google BigQuery** -- Data warehouse\
--   **dbt Core (v1.11+)** -- Transformations and testing\
--   **GitHub Actions** -- Continuous Integration\
--   **Single-dataset convention** -- Controlled via environment variable
-    `DBT_DATASET`
+Phase 1 – Population backbone implemented.
 
-------------------------------------------------------------------------
+Tables created:
+- bronze__wpp2024__population_standard_raw
+- bronze__wpp2024__population_standard
+- silver__fact_population_country_year
 
-## Logical Data Layers
+Row count validated: ~18k rows.
 
-All project tables live in one dataset and are logically separated by
-naming prefix:
+## Repository Structure
 
-  Layer    Prefix
-  -------- -------------
-  Silver   `silver__*`
-  Gold     `gold__*`
+dbt/
+models/
+silver/
+facts/
+gold/
 
-Example:
+data/
+raw/
 
-world2045_ci.silver\_\_dim_country\
-world2045_ci.silver\_\_fact_country_year_spine\
-world2045_ci.gold\_\_mart_world2045_features_country_year
+macros/
 
-------------------------------------------------------------------------
+seeds/
 
-## Phase 0 -- Foundations (Completed)
-
--   Implemented ISO3 canonical seed (`country_overrides`)
--   Built `dim_country` and `dim_year`
--   Built `fact_country_year_spine`
--   Enforced dbt contracts + tests
--   Implemented naming macros for dataset routing
--   Configured CI pipeline (dbt deps, seed, build)
-
-------------------------------------------------------------------------
-
-## Running Locally
-
-cd dbt\
-dbt deps\
-dbt seed --target ci\
-dbt build --target ci
-
-------------------------------------------------------------------------
-
-## Next Phase
-
-Phase 1 introduces backbone datasets (WDI, WPP) and first conformed
-facts.
+## Next Milestone
+Implement **World Development Indicators (WDI)** ingestion and silver modeling.

@@ -1,12 +1,22 @@
-# Changelog
+# CHANGELOG
 
-## Phase 0 -- Foundations (Completed 2026-03-02)
+## 2026-03-04
 
--   Implemented country_overrides seed
--   Built dim_country and dim_year
--   Built fact_country_year_spine
--   Implemented naming macros for single-dataset routing
--   Configured GitHub Actions CI
--   Enforced dbt contracts and schema validation
--   Resolved CSV seed formatting errors
--   Updated generic tests to dbt 1.11 compliant syntax
+### Added
+- WPP2024 ingestion workflow
+- Bronze raw population table
+- Bronze normalized population table
+- Silver population fact model
+
+### Fixed
+- dbt profile misconfiguration
+- GitHub CI YAML syntax errors
+- dbt dependency installation issues
+- BigQuery header incompatibility
+- dbt alias macro double prefix bug
+
+### Infrastructure
+- BigQuery dataset configured
+- dbt incremental merge strategy implemented
+- Partitioning by year
+- Clustering by country_iso3
