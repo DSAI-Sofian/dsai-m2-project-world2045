@@ -76,4 +76,5 @@ infrastructure/**/.terraform.lock.hcl
 dbt/profiles.yml
 
 !dbt/seeds/
-!dbt/seeds/*.csv
+!dbt/seeds/*.csvprofiles.yml
+.user.yml
