@@ -1,4 +1,6 @@
-# --- OS / Editor ---
+# =========================================================
+# OS / Editor
+# =========================================================
 .DS_Store
 Thumbs.db
 *.swp
@@ -6,7 +8,9 @@ Thumbs.db
 .vscode/
 .idea/
 
-# --- Python ---
+# =========================================================
+# Python
+# =========================================================
 __pycache__/
 *.py[cod]
 *.pyo
@@ -28,37 +32,23 @@ htmlcov/
 .pytype/
 .ipynb_checkpoints/
 
-# --- Jupyter ---
+# =========================================================
+# Jupyter
+# =========================================================
 *.ipynb
 
-# --- Logs / temp ---
+# =========================================================
+# Logs / temp / cache
+# =========================================================
 *.log
+logs/
 tmp/
 temp/
 .cache/
 
-# --- dbt ---
-# dbt local profile (never commit)
-dbt/profiles.yml
-dbt/target/
-dbt/dbt_packages/
-dbt/logs/
-dbt/.user.yml
-
-# --- Data / secrets ---
-data/
-*.parquet
-*.csv
-*.tsv
-*.jsonl
-*.ndjson
-*.sqlite
-*.duckdb
-*.db
-*.zip
-*.gz
-
-# --- Credentials (never commit) ---
+# =========================================================
+# Environment / credentials / secrets
+# =========================================================
 .env
 .env.*
 *.pem
@@ -68,13 +58,59 @@ data/
 *service-account*.json
 credentials*.json
 
-# --- Terraform (if used) ---
+# =========================================================
+# dbt generated / local-only
+# =========================================================
+dbt/profiles.yml
+dbt/.user.yml
+dbt/target/
+dbt/dbt_packages/
+dbt/logs/
+
+# Keep dbt seeds tracked
+!dbt/seeds/
+!dbt/seeds/*.csv
+
+# =========================================================
+# Data
+# =========================================================
+# Ignore local working data by default
+data/raw/*
+data/interim/*
+data/processed/*
+
+# Keep directory placeholders
+!data/raw/.gitkeep
+!data/interim/.gitkeep
+!data/processed/.gitkeep
+
+# Keep current WPP CSV files tracked for this phase
+!data/raw/wpp2024/
+!data/raw/wpp2024/**/*.csv
+
+# Explicitly ignore large source workbook
+data/raw/wpp2024/*.xlsx
+
+# Common generated data formats outside protected folders
+*.parquet
+*.tsv
+*.jsonl
+*.ndjson
+*.sqlite
+*.duckdb
+*.db
+*.zip
+*.gz
+
+# IMPORTANT:
+# Do not globally ignore *.csv or all of data/,
+# because this repo intentionally tracks dbt seeds
+# and currently keeps WPP raw files in data/raw/wpp2024.
+
+# =========================================================
+# Terraform / infrastructure
+# =========================================================
 infrastructure/**/.terraform/
 infrastructure/**/*.tfstate
 infrastructure/**/*.tfstate.*
 infrastructure/**/.terraform.lock.hcl
-dbt/profiles.yml
-
-!dbt/seeds/
-!dbt/seeds/*.csvprofiles.yml
-.user.yml
