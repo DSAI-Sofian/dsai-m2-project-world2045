@@ -1,51 +1,49 @@
-# World in 2045
+# World in 2045 – Global Development Data Platform
 
-A data‑engineering project that builds a reproducible analytics pipeline to model global development trajectories toward the year 2045.
+## Business Objective
 
-## Objectives
-- Construct a modern data platform using real-world datasets.
-- Model historical development trends.
-- Produce scenario-driven projections.
+Develop a data-driven understanding of how the world may evolve by 2045 by analyzing historical global development trends.
 
-## Technology Stack
+The platform integrates global datasets into a unified analytical warehouse supporting forecasting and policy analysis.
 
-| Layer | Technology |
-|------|------------|
-| Storage | BigQuery |
-| Transformation | dbt |
-| CI/CD | GitHub Actions |
-| Orchestration | Python pipelines |
-| Version Control | Git + GitHub |
+---
 
-## Architecture Overview
+# Key Business Questions
 
-Raw datasets are ingested into **Bronze** tables, normalized into **Silver** analytical datasets, and aggregated into **Gold** feature marts.
+Which countries will experience the largest population growth by 2045?
 
-## Current Status
+How will economic development trajectories evolve across regions?
 
-Phase 1 – Population backbone implemented.
+Which countries are likely to experience improvements in quality of life?
 
-Tables created:
-- bronze__wpp2024__population_standard_raw
-- bronze__wpp2024__population_standard
-- silver__fact_population_country_year
+Where might technological adoption accelerate or lag?
 
-Row count validated: ~18k rows.
+Which countries face the greatest risks from inequality, health, or environmental change?
 
-## Repository Structure
+---
 
-dbt/
-models/
-silver/
-facts/
-gold/
+# Required Analytics
 
-data/
-raw/
+Population trend analysis
 
-macros/
+Economic growth comparison
 
-seeds/
+Quality-of-life indicators
 
-## Next Milestone
-Implement **World Development Indicators (WDI)** ingestion and silver modeling.
+Technology adoption metrics
+
+Feature engineering for forecasting models
+
+Country-level projections to 2045
+
+---
+
+# Testing & Validation
+
+The platform uses dbt tests to validate:
+
+primary key uniqueness  
+not-null constraints  
+referential integrity across dimensions
+
+Continuous integration ensures warehouse models build successfully.

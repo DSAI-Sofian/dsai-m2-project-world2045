@@ -1,66 +1,104 @@
-# Technical README
+# Technical README – World in 2045 Data Platform
 
-## Environment Setup
+## Architecture
 
-Python virtual environment
+The platform follows a layered architecture:
 
-python -m venv .venv
-source .venv/bin/activate
+Bronze → Silver → Gold
 
-Install dbt
+Bronze: raw ingestion  
+Silver: conformed warehouse models  
+Gold: analytical marts
 
-pip install "dbt-core==1.11.*" "dbt-bigquery==1.11.*"
+---
 
-## dbt Profiles
+# Data Warehouse
 
-profiles.yml must contain profile:
-
-world2045
-
-Dataset controlled via environment variable:
-
-export DBT_DATASET=world2045_ci
-
-## BigQuery Dataset
-
-Dataset location: US
+Platform uses Google BigQuery.
 
 Dataset:
+
 world2045_ci
 
-## Naming Conventions
+---
 
-Table naming pattern:
+# dbt Structure
 
-layer__entity
+models/
 
-Examples:
+bronze/  
+silver/  
+  dims/  
+  facts/  
+gold/
 
-silver__fact_population_country_year
-gold__mart_world2045_features_country_year
+seeds/
 
-## Partition Strategy
+country_overrides.csv
 
-Large fact tables partitioned by:
+---
 
-year
+# Python Ingestion Framework
 
-Clustered by:
+src/world2045/
 
-country_iso3
+Modules:
 
-## Canonical Keys
+ingest/wpp.py  
+ingest/wdi.py
 
-country_iso3
-year
+utils/io.py
 
-## Current dbt Models
+---
 
-dim_country
-dim_year
+# Scripts
+
+run_bronze.py
+
+Runs ingestion pipelines.
+
+load_bronze_bigquery.py
+
+Loads CSV outputs to BigQuery tables.
+
+---
+
+# Development Workflow
+
+Run ingestion:
+
+python scripts/run_bronze.py
+
+Load to BigQuery:
+
+python scripts/load_bronze_bigquery.py
+
+Build warehouse:
+
+cd dbt
+dbt build
+
+---
+
+# Testing
+
+dbt tests validate:
+
+primary keys  
+not-null columns  
+relationships
+
+---
+
+# Future Extensions
+
+Planned datasets:
+
+V‑Dem governance indicators  
+Climate datasets  
+Education metrics  
+Conflict datasets
+
+All future datasets attach to:
+
 fact_country_year_spine
-fact_population_country_year
-
-## Known Fixes Applied
-
-Resolved double-prefix naming caused by generate_alias_name macro.
