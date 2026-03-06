@@ -2,4 +2,73 @@ version: 2
 
 models:
   - name: mart_world2045_features_country_year
-    description: "Minimal placeholder mart for Phase 0/1 CI validation."
+    description: >
+      Phase 1 conformed gold feature mart at country-year grain for the World in 2045
+      platform. This mart currently integrates the country-year spine, population
+      backbone, and selected World Development Indicators (WDI) features.
+
+    columns:
+      - name: country_iso3
+        data_type: string
+        description: "Canonical ISO-3166-1 alpha-3 country key."
+        tests:
+          - not_null
+
+      - name: year
+        data_type: int64
+        description: "Observation year."
+        tests:
+          - not_null
+
+      - name: population_total
+        data_type: numeric
+        description: "Total population."
+
+      - name: gdp_current_usd
+        data_type: numeric
+        description: "GDP in current US dollars."
+
+      - name: gdp_per_capita_current_usd
+        data_type: numeric
+        description: "GDP per capita in current US dollars."
+
+      - name: gdp_growth_pct
+        data_type: numeric
+        description: "Annual GDP growth percentage."
+
+      - name: unemployment_pct
+        data_type: numeric
+        description: "Unemployment rate as percentage of total labor force."
+
+      - name: inflation_cpi_pct
+        data_type: numeric
+        description: "Consumer price inflation, annual percentage."
+
+      - name: life_expectancy_years
+        data_type: numeric
+        description: "Life expectancy at birth in years."
+
+      - name: under5_mortality_per_1000
+        data_type: numeric
+        description: "Under-5 mortality per 1,000 live births."
+
+      - name: secondary_enrollment_gross_pct
+        data_type: numeric
+        description: "Gross secondary school enrollment percentage."
+
+      - name: internet_users_pct
+        data_type: numeric
+        description: "Individuals using the internet as percentage of population."
+
+      - name: access_to_electricity_pct
+        data_type: numeric
+        description: "Access to electricity as percentage of population."
+
+      - name: poverty_headcount_pct
+        data_type: numeric
+        description: "Poverty headcount ratio at $3.65/day (2017 PPP)."
+
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: ['country_iso3', 'year']

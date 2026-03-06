@@ -1,16 +1,24 @@
 version: 2
 
 sources:
+
   - name: world-development-indicators
     schema: "{{ env_var('DBT_DATASET', 'world2045_ci') }}"
     tables:
+
+      # Existing WDI tables (kept for compatibility)
       - name: bronze__wdi__observations
       - name: bronze__wdi__indicator_dim
       - name: bronze__wdi__country_dim
 
+      # New ingestion table from Phase 1 pipeline
+      - name: bronze__wdi_country_year_long
+        description: "World Bank WDI observations at country-year-indicator grain."
+
   - name: world-population-projections
     schema: "{{ env_var('DBT_DATASET', 'world2045_ci') }}"
     tables:
+
       - name: bronze__wpp2024__population_standard
       - name: bronze__wpp2024__population_probabilistic
       - name: bronze__wpp2024__fertility_probabilistic

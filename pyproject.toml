@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "world2045"
+version = "0.1.0"
+description = "World in 2045 data platform"
+requires-python = ">=3.10"
+dependencies = [
+    "pandas>=2.1,<3.0",
+    "numpy>=1.26",
+    "requests",
+    "pyyaml",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
