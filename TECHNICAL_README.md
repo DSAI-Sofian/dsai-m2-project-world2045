@@ -1,104 +1,247 @@
-# Technical README – World in 2045 Data Platform
+# World in 2045 — Technical Documentation
 
-## Architecture
+## Technology Stack
 
-The platform follows a layered architecture:
-
-Bronze → Silver → Gold
-
-Bronze: raw ingestion  
-Silver: conformed warehouse models  
-Gold: analytical marts
+| Component       | Technology      |
+| --------------- | --------------- |
+| Warehouse       | Google BigQuery |
+| Transformation  | dbt             |
+| Ingestion       | Python          |
+| Version Control | GitHub          |
+| CI              | GitHub Actions  |
 
 ---
 
-# Data Warehouse
+# Warehouse Dataset
 
-Platform uses Google BigQuery.
-
-Dataset:
-
+```
 world2045_ci
+```
+
+All models are materialized in a **single dataset architecture**.
+
+Example table names:
+
+```
+silver__fact_population_country_year
+silver__wdi_country_year_long
+gold__mart_world2045_features_country_year
+```
 
 ---
 
-# dbt Structure
+# Core Data Model
 
-models/
+## Dimension Tables
 
-bronze/  
-silver/  
-  dims/  
-  facts/  
-gold/
+### dim_country
 
-seeds/
+Canonical country dimension using **ISO-3166-1 alpha-3 codes**.
 
-country_overrides.csv
+Key column:
 
----
+```
+country_iso3
+```
 
-# Python Ingestion Framework
+Additional attributes:
 
-src/world2045/
-
-Modules:
-
-ingest/wpp.py  
-ingest/wdi.py
-
-utils/io.py
+* region
+* subregion
+* income_group
 
 ---
 
-# Scripts
+### dim_year
 
-run_bronze.py
+Calendar year dimension.
 
-Runs ingestion pipelines.
+Coverage:
 
-load_bronze_bigquery.py
-
-Loads CSV outputs to BigQuery tables.
-
----
-
-# Development Workflow
-
-Run ingestion:
-
-python scripts/run_bronze.py
-
-Load to BigQuery:
-
-python scripts/load_bronze_bigquery.py
-
-Build warehouse:
-
-cd dbt
-dbt build
+```
+1945 → 2100
+```
 
 ---
 
-# Testing
+# Country-Year Spine
 
-dbt tests validate:
-
-primary keys  
-not-null columns  
-relationships
-
----
-
-# Future Extensions
-
-Planned datasets:
-
-V‑Dem governance indicators  
-Climate datasets  
-Education metrics  
-Conflict datasets
-
-All future datasets attach to:
-
+```
 fact_country_year_spine
+```
+
+This table contains **all valid country-year combinations**.
+
+Purpose:
+
+* ensures consistent joins
+* guarantees analytical grain
+* prevents missing entity-year combinations
+
+All facts must join through the spine.
+
+---
+
+# Silver Layer Models
+
+### Population
+
+```
+silver__fact_population_country_year
+```
+
+Source:
+
+```
+UN World Population Prospects
+```
+
+Grain:
+
+```
+country_iso3, year
+```
+
+---
+
+### WDI Indicators
+
+```
+silver__wdi_country_year_long
+```
+
+Structure:
+
+```
+country_iso3
+year
+indicator_id
+value
+```
+
+This long format allows flexible pivoting of indicators.
+
+---
+
+### Governance (V-Dem)
+
+```
+silver__fact_governance_country_year
+```
+
+Indicators:
+
+```
+vdem_liberal_democracy_index
+vdem_electoral_democracy_index
+vdem_judicial_constraints_index
+vdem_civil_liberties_index
+```
+
+---
+
+# Gold Layer
+
+### mart_world2045_features_country_year
+
+Unified analytical dataset combining:
+
+```
+population
+economic indicators
+social indicators
+governance indicators
+```
+
+Example columns:
+
+```
+population_total
+gdp_current_usd
+life_expectancy_years
+internet_users_pct
+vdem_liberal_democracy_index
+```
+
+Availability flags are generated for each major domain.
+
+Example:
+
+```
+population_available
+gdp_available
+governance_available
+```
+
+---
+
+# dbt Testing Strategy
+
+Tests implemented:
+
+### Column integrity
+
+```
+not_null
+```
+
+### Referential integrity
+
+```
+relationships
+```
+
+### Analytical grain
+
+```
+dbt_utils.unique_combination_of_columns
+```
+
+---
+
+# Ingestion Best Practices
+
+The following rules are applied for all ingestion pipelines.
+
+### 1 Inspect source files first
+
+Always inspect source ZIP contents before building ingestion scripts.
+
+### 2 Extract minimal columns
+
+Wide datasets should first be narrowed before loading.
+
+### 3 Avoid high memory loads
+
+Large files should be streamed or filtered before ingestion.
+
+### 4 Validate schema before dbt
+
+Bronze files must be verified before building silver models.
+
+---
+
+# CI Pipeline
+
+GitHub Actions executes:
+
+```
+dbt deps
+dbt seed
+dbt build
+```
+
+This ensures all models compile and pass tests.
+
+---
+
+# Future Technical Enhancements
+
+Planned improvements:
+
+* partitioning and clustering for BigQuery tables
+* domain-specific marts
+* data quality monitoring
+* feature store for predictive modelling
+
+---

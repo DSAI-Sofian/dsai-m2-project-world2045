@@ -1,119 +1,80 @@
 # CHANGELOG
 
-## Phase 0 – Platform Initialization
+## Phase 2 — Governance Integration
 
-Repository structure created.
+Major milestone introducing governance indicators.
 
-Python ingestion framework implemented.
+### Added
 
-Bronze/Silver/Gold architecture established.
+* V-Dem dataset ingestion pipeline
+* `silver__fact_governance_country_year` model
+* governance indicators added to gold mart
 
-dbt project initialized with BigQuery adapter.
+Indicators included:
 
-Core warehouse models implemented:
+* liberal democracy index
+* electoral democracy index
+* judicial constraints index
+* civil liberties index
 
-dim_country  
-dim_year  
-fact_country_year_spine
+### Improvements
 
-CI/CD implemented with GitHub Actions validating dbt builds and tests.
+* governance availability flags in gold mart
+* validation tests for country and year keys
+* standardized governance schema
+
+### Fixes
+
+* corrected population reference in gold mart
+* resolved dbt naming mismatch between logical and physical tables
+* removed unsupported `dbt_expectations` tests
 
 ---
 
-## Phase 1 – Data Backbone Implementation
+## Phase 1 — Development Backbone
 
-Population ingestion pipeline implemented for:
+### Added
 
-UN World Population Prospects (WPP 2024)
+* UN population ingestion
+* World Bank WDI ingestion
+* country-year conformed schema
 
-Components created:
+### New tables
 
-run_bronze.py  
-WPP ingestion module  
-population_standard bronze dataset
-
-Silver model created:
-
+```
+dim_country
+dim_year
+fact_country_year_spine
 silver__fact_population_country_year
-
----
-
-World Development Indicators pipeline implemented.
-
-Components created:
-
-wdi.py ingestion module  
-API pagination handling  
-timeout protection  
-indicator filtering
-
-Bronze dataset created:
-
-bronze__wdi_country_year_long
-
-Silver transformation:
-
 silver__wdi_country_year_long
+```
 
-Improvements implemented:
+### Gold mart
 
-country code normalization  
-aggregate removal  
-type standardization
+Initial version of:
 
----
+```
+mart_world2045_features_country_year
+```
 
-Country dimension expanded.
-
-Original prototype seed contained:
-
-USA  
-SGP
-
-Seed expanded to ~159 sovereign entities.
-
-Models rebuilt:
-
-dim_country  
-fact_country_year_spine
+with economic and social indicators.
 
 ---
 
-Gold analytical mart implemented:
+## Phase 0 — Infrastructure Setup
 
-gold__mart_world2045_features_country_year
+### Repository initialization
 
-Features integrated:
+* project directory structure
+* Python ingestion framework
 
-population  
-economic indicators  
-health indicators  
-technology indicators  
-poverty indicators
+### Warehouse
 
-Mart grain:
+* BigQuery dataset
+* dbt project configuration
 
-country_iso3, year
+### CI
 
-Coverage indicators added for feature availability.
+* GitHub Actions dbt pipeline
 
 ---
-
-## Phase 1 Final State
-
-Population backbone operational.
-
-Economic indicators integrated.
-
-Country‑year analytical mart implemented.
-
-Total rows in mart:
-
-16059
-
-Coverage:
-
-159 countries  
-~101 years
-
-Architecture validated through dbt tests.
