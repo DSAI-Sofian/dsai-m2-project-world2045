@@ -24,3 +24,9 @@ sources:
       - name: bronze__wpp2024__fertility_probabilistic
       - name: bronze__wpp2024__mortality_probabilistic
       - name: bronze__wpp2024__migration_probabilistic
+  
+  - name: bronze
+    schema: "{{ env_var('DBT_DATASET', 'world2045_ci') }}"
+    tables:
+      - name: vdem_country_year
+        description: "Conformed bronze governance extract from V-Dem at country-year grain."

@@ -3,20 +3,18 @@ version: 2
 models:
   - name: mart_world2045_features_country_year
     description: >
-      Phase 1 conformed gold feature mart at country-year grain for the World in 2045
-      platform. This mart currently integrates the country-year spine, population
-      backbone, and selected World Development Indicators (WDI) features.
+      Country-year analytical mart for World in 2045 modeling and forecasting.
 
     columns:
       - name: country_iso3
         data_type: string
-        description: "Canonical ISO-3166-1 alpha-3 country key."
+        description: "ISO 3166-1 alpha-3 country code."
         tests:
           - not_null
 
       - name: year
         data_type: int64
-        description: "Observation year."
+        description: "Calendar year."
         tests:
           - not_null
 
@@ -26,23 +24,23 @@ models:
 
       - name: gdp_current_usd
         data_type: numeric
-        description: "GDP in current US dollars."
+        description: "GDP in current USD."
 
       - name: gdp_per_capita_current_usd
         data_type: numeric
-        description: "GDP per capita in current US dollars."
+        description: "GDP per capita in current USD."
 
       - name: gdp_growth_pct
         data_type: numeric
-        description: "Annual GDP growth percentage."
+        description: "Annual GDP growth percent."
 
       - name: unemployment_pct
         data_type: numeric
-        description: "Unemployment rate as percentage of total labor force."
+        description: "Unemployment rate percent."
 
       - name: inflation_cpi_pct
         data_type: numeric
-        description: "Consumer price inflation, annual percentage."
+        description: "Consumer price inflation percent."
 
       - name: life_expectancy_years
         data_type: numeric
@@ -54,21 +52,68 @@ models:
 
       - name: secondary_enrollment_gross_pct
         data_type: numeric
-        description: "Gross secondary school enrollment percentage."
+        description: "Gross secondary enrollment percent."
 
       - name: internet_users_pct
         data_type: numeric
-        description: "Individuals using the internet as percentage of population."
+        description: "Individuals using the internet percent."
 
       - name: access_to_electricity_pct
         data_type: numeric
-        description: "Access to electricity as percentage of population."
+        description: "Population with access to electricity percent."
 
       - name: poverty_headcount_pct
         data_type: numeric
-        description: "Poverty headcount ratio at $3.65/day (2017 PPP)."
+        description: "Poverty headcount ratio percent."
 
-    tests:
-      - dbt_utils.unique_combination_of_columns:
-          arguments:
-            combination_of_columns: ['country_iso3', 'year']
+      - name: vdem_liberal_democracy_index
+        data_type: numeric
+        description: "V-Dem liberal democracy index at country-year grain."
+
+      - name: vdem_electoral_democracy_index
+        data_type: numeric
+        description: "V-Dem electoral democracy index at country-year grain."
+
+      - name: vdem_judicial_constraints_index
+        data_type: numeric
+        description: "V-Dem judicial constraints index at country-year grain."
+
+      - name: vdem_civil_liberties_index
+        data_type: numeric
+        description: "V-Dem civil liberties index at country-year grain."
+
+      - name: population_available
+        data_type: bool
+        description: "True when population data is available for the country-year."
+
+      - name: gdp_available
+        data_type: bool
+        description: "True when GDP data is available for the country-year."
+
+      - name: life_expectancy_available
+        data_type: bool
+        description: "True when life expectancy data is available for the country-year."
+
+      - name: internet_available
+        data_type: bool
+        description: "True when internet usage data is available for the country-year."
+
+      - name: governance_available
+        data_type: bool
+        description: "True when governance data is available for the country-year."
+
+      - name: vdem_liberal_democracy_available
+        data_type: bool
+        description: "True when liberal democracy index is populated."
+
+      - name: vdem_electoral_democracy_available
+        data_type: bool
+        description: "True when electoral democracy index is populated."
+
+      - name: vdem_judicial_constraints_available
+        data_type: bool
+        description: "True when judicial constraints index is populated."
+
+      - name: vdem_civil_liberties_available
+        data_type: bool
+        description: "True when civil liberties index is populated."

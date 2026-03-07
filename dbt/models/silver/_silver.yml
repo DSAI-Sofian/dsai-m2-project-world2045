@@ -182,3 +182,49 @@ models:
       - dbt_utils.unique_combination_of_columns:
           arguments:
             combination_of_columns: ['country_iso3', 'year', 'indicator_id']
+  
+  - name: silver__fact_governance_country_year
+    description: >
+      Country-year governance indicators conformed from V-Dem for analytical use. Materialized as `silver__fact_governance_country_year` in the dataset defined by `DBT_DATASET` (or `target.dataset`).
+    
+    columns:
+    - name: country_iso3
+      data_type: string
+      description: "ISO-3166-1 alpha-3 country code."
+      tests:
+        - not_null
+        - relationships:
+            arguments:
+              to: ref('dim_country')
+              field: country_iso3
+
+    - name: year
+      data_type: int64
+      description: "Calendar year."
+      tests:
+        - not_null
+        - relationships:
+            arguments:
+              to: ref('dim_year')
+              field: year
+
+    - name: vdem_liberal_democracy_index
+      data_type: float64
+      description: "V-Dem liberal democracy index."
+
+    - name: vdem_electoral_democracy_index
+      data_type: float64
+      description: "V-Dem electoral democracy index."
+
+    - name: vdem_judicial_constraints_index
+      data_type: float64
+      description: "V-Dem judicial constraints index."
+
+    - name: vdem_civil_liberties_index
+      data_type: float64
+      description: "V-Dem civil liberties index."
+
+    tests:
+    - dbt_utils.unique_combination_of_columns:
+        arguments:
+          combination_of_columns: ['country_iso3', 'year']

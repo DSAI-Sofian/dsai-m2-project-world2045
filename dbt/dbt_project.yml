@@ -45,7 +45,6 @@ models:
             end: 2101
             interval: 1
         +cluster_by: ["country_iso3"]
-        # REQUIRED when incremental + contracts enforced
         +on_schema_change: "append_new_columns"
 
       indicators:
@@ -60,8 +59,10 @@ models:
             end: 2101
             interval: 1
         +cluster_by: ["country_iso3", "indicator"]
-        # REQUIRED when incremental + contracts enforced
         +on_schema_change: "append_new_columns"
+
+      governance:
+        +materialized: table
 
     gold:
       +schema: "{{ env_var('DBT_DATASET', 'world2045_ci') }}"

@@ -52,6 +52,19 @@ wdi_pivot as (
     from wdi_long
     group by 1, 2
 
+),
+
+governance as (
+
+    select
+        country_iso3,
+        year,
+        vdem_liberal_democracy_index,
+        vdem_electoral_democracy_index,
+        vdem_judicial_constraints_index,
+        vdem_civil_liberties_index
+    from {{ ref('silver__fact_governance_country_year') }}
+
 )
 
 select
@@ -70,7 +83,23 @@ select
     w.secondary_enrollment_gross_pct,
     w.internet_users_pct,
     w.access_to_electricity_pct,
-    w.poverty_headcount_pct
+    w.poverty_headcount_pct,
+
+    g.vdem_liberal_democracy_index,
+    g.vdem_electoral_democracy_index,
+    g.vdem_judicial_constraints_index,
+    g.vdem_civil_liberties_index,
+
+    p.population_total is not null as population_available,
+    w.gdp_current_usd is not null as gdp_available,
+    w.life_expectancy_years is not null as life_expectancy_available,
+    w.internet_users_pct is not null as internet_available,
+
+    g.country_iso3 is not null as governance_available,
+    g.vdem_liberal_democracy_index is not null as vdem_liberal_democracy_available,
+    g.vdem_electoral_democracy_index is not null as vdem_electoral_democracy_available,
+    g.vdem_judicial_constraints_index is not null as vdem_judicial_constraints_available,
+    g.vdem_civil_liberties_index is not null as vdem_civil_liberties_available
 
 from spine s
 left join population p
@@ -79,3 +108,6 @@ left join population p
 left join wdi_pivot w
     on s.country_iso3 = w.country_iso3
    and s.year = w.year
+left join governance g
+    on s.country_iso3 = g.country_iso3
+   and s.year = g.year
