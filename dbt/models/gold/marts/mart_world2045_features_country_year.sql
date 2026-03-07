@@ -1,4 +1,6 @@
-{{ config(materialized="table") }}
+{{ config(
+    materialized = 'table'
+) }}
 
 with spine as (
 
@@ -28,6 +30,18 @@ wdi_long as (
         indicator_id,
         value
     from {{ ref('silver__wdi_country_year_long') }}
+    where indicator_id in (
+        'NY.GDP.MKTP.CD',
+        'NY.GDP.PCAP.CD',
+        'NY.GDP.MKTP.KD.ZG',
+        'SL.UEM.TOTL.ZS',
+        'FP.CPI.TOTL.ZG',
+        'SP.DYN.LE00.IN',
+        'SH.DYN.MORT',
+        'IT.NET.USER.ZS',
+        'EG.ELC.ACCS.ZS',
+        'SI.POV.LMIC'
+    )
 
 ),
 
@@ -44,13 +58,22 @@ wdi_pivot as (
         max(case when indicator_id = 'FP.CPI.TOTL.ZG' then value end) as inflation_cpi_pct,
         max(case when indicator_id = 'SP.DYN.LE00.IN' then value end) as life_expectancy_years,
         max(case when indicator_id = 'SH.DYN.MORT' then value end) as under5_mortality_per_1000,
-        max(case when indicator_id = 'SE.SEC.ENRR' then value end) as secondary_enrollment_gross_pct,
         max(case when indicator_id = 'IT.NET.USER.ZS' then value end) as internet_users_pct,
         max(case when indicator_id = 'EG.ELC.ACCS.ZS' then value end) as access_to_electricity_pct,
         max(case when indicator_id = 'SI.POV.LMIC' then value end) as poverty_headcount_pct
 
     from wdi_long
     group by 1, 2
+
+),
+
+education as (
+
+    select
+        country_iso3,
+        year,
+        secondary_enrollment_gross_pct
+    from {{ ref('silver__fact_education_country_year') }}
 
 ),
 
@@ -80,7 +103,7 @@ select
     w.inflation_cpi_pct,
     w.life_expectancy_years,
     w.under5_mortality_per_1000,
-    w.secondary_enrollment_gross_pct,
+    e.secondary_enrollment_gross_pct,
     w.internet_users_pct,
     w.access_to_electricity_pct,
     w.poverty_headcount_pct,
@@ -93,6 +116,7 @@ select
     p.population_total is not null as population_available,
     w.gdp_current_usd is not null as gdp_available,
     w.life_expectancy_years is not null as life_expectancy_available,
+    e.secondary_enrollment_gross_pct is not null as secondary_enrollment_available,
     w.internet_users_pct is not null as internet_available,
 
     g.country_iso3 is not null as governance_available,
@@ -108,6 +132,9 @@ left join population p
 left join wdi_pivot w
     on s.country_iso3 = w.country_iso3
    and s.year = w.year
+left join education e
+    on s.country_iso3 = e.country_iso3
+   and s.year = e.year
 left join governance g
     on s.country_iso3 = g.country_iso3
    and s.year = g.year

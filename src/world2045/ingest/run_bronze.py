@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from world2045.ingest.vdem import ingest_vdem_from_zip
 from world2045.ingest.wpp import read_wpp_population_standard
 from world2045.ingest.wdi import ingest_wdi
 
@@ -22,6 +23,16 @@ def main() -> None:
         end_year=2024,
     )
     print(f"WDI bronze written to: {wdi_path}")
+
+    vdem_zip_path = bronze_root / "vdem" / "vdem.zip"
+    if vdem_zip_path.exists():
+        vdem_path = ingest_vdem_from_zip(
+            local_zip_path=str(vdem_zip_path),
+            bronze_root=str(bronze_root),
+        )
+        print(f"V-Dem bronze written to: {vdem_path}")
+    else:
+        print(f"V-Dem ZIP not found, skipping: {vdem_zip_path}")
 
     print("Bronze ingestion complete.")
 

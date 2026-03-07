@@ -117,3 +117,9 @@ models:
       - name: vdem_civil_liberties_available
         data_type: bool
         description: "True when civil liberties index is populated."
+
+      - name: secondary_enrollment_gross_pct
+        data_type: numeric
+
+      - name: secondary_enrollment_available
+        data_type: bool
