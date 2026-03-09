@@ -1,247 +1,86 @@
-# World in 2045 — Technical Documentation
+# Technical README -- World2045 Platform
 
 ## Technology Stack
 
-| Component       | Technology      |
-| --------------- | --------------- |
-| Warehouse       | Google BigQuery |
-| Transformation  | dbt             |
-| Ingestion       | Python          |
-| Version Control | GitHub          |
-| CI              | GitHub Actions  |
+-   BigQuery
+-   dbt (v1.11)
+-   Python ingestion scripts
+-   GitHub CI
 
----
+## Warehouse Design
 
-# Warehouse Dataset
+Single dataset strategy.
 
-```
-world2045_ci
-```
+Tables are prefixed by layer:
 
-All models are materialized in a **single dataset architecture**.
+silver\_\_\* gold\_\_\*
 
-Example table names:
+### Grain
 
-```
-silver__fact_population_country_year
-silver__wdi_country_year_long
-gold__mart_world2045_features_country_year
-```
+Primary analytical grain:
 
----
+country_iso3 + year
 
-# Core Data Model
-
-## Dimension Tables
-
-### dim_country
-
-Canonical country dimension using **ISO-3166-1 alpha-3 codes**.
-
-Key column:
-
-```
-country_iso3
-```
-
-Additional attributes:
-
-* region
-* subregion
-* income_group
-
----
-
-### dim_year
-
-Calendar year dimension.
-
-Coverage:
-
-```
-1945 → 2100
-```
-
----
-
-# Country-Year Spine
-
-```
-fact_country_year_spine
-```
-
-This table contains **all valid country-year combinations**.
-
-Purpose:
-
-* ensures consistent joins
-* guarantees analytical grain
-* prevents missing entity-year combinations
-
-All facts must join through the spine.
-
----
-
-# Silver Layer Models
+## Key Tables
 
 ### Population
 
-```
-silver__fact_population_country_year
-```
+silver\_\_fact_population_country_year
 
-Source:
+Source: UN WPP
 
-```
-UN World Population Prospects
-```
+Coverage: 1950 -- 2100
 
-Grain:
+### Governance
 
-```
-country_iso3, year
-```
+silver\_\_fact_governance_country_year
 
----
+Source: V‑Dem
 
-### WDI Indicators
+### WDI Long Table
 
-```
-silver__wdi_country_year_long
-```
+silver\_\_wdi_country_year_long
 
 Structure:
 
-```
-country_iso3
-year
-indicator_id
+country_iso3\
+year\
+indicator_id\
 value
-```
 
-This long format allows flexible pivoting of indicators.
+## Domain Fact Models
 
----
+Health
 
-### Governance (V-Dem)
+Indicators: SP.DYN.LE00.IN -- life expectancy\
+SH.DYN.MORT -- under‑5 mortality
 
-```
-silver__fact_governance_country_year
-```
+Education
 
-Indicators:
+Indicator: SE.SEC.ENRR -- secondary enrollment
 
-```
-vdem_liberal_democracy_index
-vdem_electoral_democracy_index
-vdem_judicial_constraints_index
-vdem_civil_liberties_index
-```
+Inequality
 
----
+Indicator: SI.POV.LMIC -- poverty headcount
 
-# Gold Layer
+## Gold Mart
 
-### mart_world2045_features_country_year
+gold\_\_mart_world2045_features_country_year
 
-Unified analytical dataset combining:
+Purpose: Integrated country‑year analytical feature table.
 
-```
-population
-economic indicators
-social indicators
-governance indicators
-```
+### Analytic Slice
 
-Example columns:
+gold\_\_mart_world2045_features_analytic_1960_2023
 
-```
-population_total
-gdp_current_usd
-life_expectancy_years
-internet_users_pct
-vdem_liberal_democracy_index
-```
+Purpose: Dense historical dataset for modelling.
 
-Availability flags are generated for each major domain.
+## Diagnostic Models
 
-Example:
+gold\_\_profile_indicator_coverage_by_year
 
-```
-population_available
-gdp_available
-governance_available
-```
+Tracks indicator density over time.
 
----
+gold\_\_profile_indicator_coverage_by_country
 
-# dbt Testing Strategy
-
-Tests implemented:
-
-### Column integrity
-
-```
-not_null
-```
-
-### Referential integrity
-
-```
-relationships
-```
-
-### Analytical grain
-
-```
-dbt_utils.unique_combination_of_columns
-```
-
----
-
-# Ingestion Best Practices
-
-The following rules are applied for all ingestion pipelines.
-
-### 1 Inspect source files first
-
-Always inspect source ZIP contents before building ingestion scripts.
-
-### 2 Extract minimal columns
-
-Wide datasets should first be narrowed before loading.
-
-### 3 Avoid high memory loads
-
-Large files should be streamed or filtered before ingestion.
-
-### 4 Validate schema before dbt
-
-Bronze files must be verified before building silver models.
-
----
-
-# CI Pipeline
-
-GitHub Actions executes:
-
-```
-dbt deps
-dbt seed
-dbt build
-```
-
-This ensures all models compile and pass tests.
-
----
-
-# Future Technical Enhancements
-
-Planned improvements:
-
-* partitioning and clustering for BigQuery tables
-* domain-specific marts
-* data quality monitoring
-* feature store for predictive modelling
-
----
+Tracks data completeness per country.

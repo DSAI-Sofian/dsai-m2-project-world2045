@@ -1,80 +1,37 @@
 # CHANGELOG
 
-## Phase 2 — Governance Integration
+## Phase 2 -- Socio‑Economic Domain Expansion
 
-Major milestone introducing governance indicators.
+Completed:
 
-### Added
+Added health domain model silver\_\_fact_health_country_year
 
-* V-Dem dataset ingestion pipeline
-* `silver__fact_governance_country_year` model
-* governance indicators added to gold mart
+Added education domain model silver\_\_fact_education_country_year
 
-Indicators included:
+Added inequality domain model silver\_\_fact_inequality_country_year
 
-* liberal democracy index
-* electoral democracy index
-* judicial constraints index
-* civil liberties index
+Aligned models with actual WDI indicators present in dataset.
 
-### Improvements
+Education SE.SEC.ENRR
 
-* governance availability flags in gold mart
-* validation tests for country and year keys
-* standardized governance schema
+Inequality SI.POV.LMIC
 
-### Fixes
+Health SP.DYN.LE00.IN SH.DYN.MORT
 
-* corrected population reference in gold mart
-* resolved dbt naming mismatch between logical and physical tables
-* removed unsupported `dbt_expectations` tests
+## Gold Mart Enhancements
 
----
+Updated gold\_\_mart_world2045_features_country_year
 
-## Phase 1 — Development Backbone
+Added availability flags.
 
-### Added
+Created analytical slice:
 
-* UN population ingestion
-* World Bank WDI ingestion
-* country-year conformed schema
+gold\_\_mart_world2045_features_analytic_1960_2023
 
-### New tables
+## Diagnostics Added
 
-```
-dim_country
-dim_year
-fact_country_year_spine
-silver__fact_population_country_year
-silver__wdi_country_year_long
-```
+gold\_\_profile_indicator_coverage_by_year
 
-### Gold mart
+gold\_\_profile_indicator_coverage_by_country
 
-Initial version of:
-
-```
-mart_world2045_features_country_year
-```
-
-with economic and social indicators.
-
----
-
-## Phase 0 — Infrastructure Setup
-
-### Repository initialization
-
-* project directory structure
-* Python ingestion framework
-
-### Warehouse
-
-* BigQuery dataset
-* dbt project configuration
-
-### CI
-
-* GitHub Actions dbt pipeline
-
----
+Purpose: Data completeness diagnostics for modelling readiness.

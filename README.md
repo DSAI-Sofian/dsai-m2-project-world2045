@@ -1,256 +1,62 @@
-# World in 2045 — Global Development Data Platform
+# World2045 Data Platform
 
 ## Project Objective
 
-The **World in 2045** project builds a structured analytical data platform designed to explore historical global development trends and support long-range analysis of the world approaching the year **2045**.
+Build a multi‑domain analytical platform to study long‑term global
+development trends and model plausible trajectories toward the year
+2045.
 
-The platform integrates data from international statistical organizations such as:
+The platform integrates demographic, economic, social, governance, and
+risk indicators into a unified **country‑year analytical mart**.
 
-* United Nations Population Division
-* World Bank World Development Indicators (WDI)
-* V-Dem Institute Governance Dataset
-* (Planned) WHO Global Health Observatory
-* (Planned) Climate and conflict datasets
+## Architecture
 
-The final outcome is a **country-year analytical warehouse** capable of supporting:
+Bronze → Silver → Gold
 
-* historical trend analysis
-* comparative country analysis
-* development trajectory modelling
-* long-term scenario analysis
+**Bronze** Raw ingested datasets: - World Development Indicators (WDI) -
+UN World Population Prospects (WPP) - V‑Dem Governance Dataset
 
----
+**Silver** Conformed domain facts and dimensions:
 
-# Analytical Grain
+Dimensions - dim_country - dim_year
 
-All data in the warehouse conforms to a single analytical grain:
+Spine - fact_country_year_spine
 
-```
-country_iso3
-year
-```
+Domain facts - silver\_\_fact_population_country_year -
+silver\_\_fact_governance_country_year -
+silver\_\_fact_health_country_year -
+silver\_\_fact_education_country_year -
+silver\_\_fact_inequality_country_year
 
-Example row:
+Indicator transformation - silver\_\_wdi_country_year_long -
+silver\_\_wdi_country_year_features
 
-| country | year | population | gdp | democracy_index | life_expectancy |
-| ------- | ---- | ---------- | --- | --------------- | --------------- |
-| SGP     | 2020 | ...        | ... | ...             | ...             |
+**Gold** Integrated analytical mart
 
----
+-   gold\_\_mart_world2045_features_country_year
+-   gold\_\_mart_world2045_features_analytic_1960_2023
 
-# Key Business Questions
+Diagnostics - gold\_\_profile_indicator_coverage_by_year -
+gold\_\_profile_indicator_coverage_by_country
 
-The platform enables analysis of questions such as:
+## Analytical Window
 
-### Development Trajectory
+Dense indicator overlap: 1960 -- 2023
 
-* Which countries are improving most rapidly in governance, education and economic indicators?
-* What patterns precede sustained development?
+Population projections extend to: 2100
 
-### Governance & Stability
+## Current Domain Coverage
 
-* Does democratic governance correlate with long-term economic growth?
-* Are judicial independence and civil liberties predictive of prosperity?
+Population -- WPP\
+Economy -- WDI GDP indicators\
+Health -- life expectancy, mortality indicators\
+Education -- secondary enrollment\
+Inequality -- poverty headcount ratio\
+Governance -- V‑Dem indices
 
-### Population & Economy
+## Next Phase
 
-* How do demographic changes affect economic development?
-* Which countries are approaching demographic decline?
+Phase 3 -- Risk Domains
 
-### Digital Development
-
-* How does internet penetration relate to GDP growth and education?
-
-### Future Outlook
-
-* Which countries are likely to achieve high-income status by **2045**?
-
----
-
-# Platform Architecture
-
-The warehouse follows a **modern ELT layered architecture**.
-
-```
-Raw Data Sources
-       ↓
-Bronze Layer
-(raw ingestion)
-       ↓
-Silver Layer
-(conformed normalized warehouse)
-       ↓
-Gold Layer
-(analytical feature marts)
-```
-
-### Bronze
-
-Raw datasets ingested from source systems.
-
-Examples:
-
-* UN Population Division (WPP)
-* World Bank WDI
-* V-Dem Governance Dataset
-
-### Silver
-
-Conformed warehouse tables standardized to the **country-year grain**.
-
-Key tables:
-
-```
-dim_country
-dim_year
-fact_country_year_spine
-silver__fact_population_country_year
-silver__wdi_country_year_long
-silver__fact_governance_country_year
-```
-
-### Gold
-
-Analytical marts used for modeling and exploration.
-
-Primary mart:
-
-```
-mart_world2045_features_country_year
-```
-
-This mart integrates:
-
-* population
-* economic indicators
-* development indicators
-* governance indicators
-
----
-
-# Indicators Currently Included (Phase 2)
-
-### Population
-
-* total population
-
-### Economy
-
-* GDP current USD
-* GDP per capita
-* GDP growth
-
-### Social Indicators
-
-* life expectancy
-* under-5 mortality
-* internet penetration
-* electricity access
-* secondary school enrollment
-* poverty headcount
-
-### Governance (V-Dem)
-
-* liberal democracy index
-* electoral democracy index
-* judicial constraints index
-* civil liberties index
-
----
-
-# Data Testing Strategy
-
-Data validation is implemented using **dbt tests**.
-
-Key validation rules:
-
-### Key integrity
-
-```
-country_iso3 not_null
-year not_null
-```
-
-### Referential integrity
-
-```
-relationships → dim_country
-relationships → dim_year
-```
-
-### Analytical grain validation
-
-```
-unique(country_iso3, year)
-```
-
-These guarantees ensure every dataset conforms to the **country-year analytical schema**.
-
----
-
-# Repository Structure
-
-```
-dsai-m2-personal-assignment/
-
-src/world2045/
-    ingest/
-    utils/
-
-dbt/
-    models/
-        silver/
-        gold/
-    seeds/
-    tests/
-
-data/
-    raw/
-    bronze/
-```
-
----
-
-# Project Phases
-
-### Phase 0 — Infrastructure
-
-* repository structure
-* dbt project initialization
-* BigQuery warehouse
-* CI pipeline
-
-### Phase 1 — Core Development Data
-
-* UN population ingestion
-* WDI ingestion
-* country-year warehouse backbone
-
-### Phase 2 — Governance
-
-* V-Dem governance ingestion
-* governance feature integration
-
-Future phases will introduce:
-
-* education
-* health
-* climate risk
-* inequality
-* conflict indicators
-
----
-
-# Current Status
-
-Completed phases:
-
-```
-Phase 0 — Infrastructure
-Phase 1 — Population & Economic Backbone
-Phase 2 — Governance Indicators
-```
-
-The platform now provides a unified dataset capable of supporting multi-domain development analysis.
-
----
+1.  Climate risk
+2.  Conflict / geopolitical instability

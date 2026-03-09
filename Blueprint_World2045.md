@@ -1,142 +1,41 @@
-# World in 2045 Platform Blueprint
+# World2045 Platform Blueprint
 
-## Vision
+## Analytical Question
 
-Create a unified data platform capable of analyzing global development trajectories and exploring possible outcomes for the world approaching **2045**.
+What structural indicators best explain long‑term national development
+trajectories toward 2045?
 
-The platform integrates multiple international datasets into a single **country-year analytical warehouse**.
+## Data Domains
 
----
+Population Economy Health Education Inequality Governance Climate Risk
+(planned) Conflict (planned)
 
-# Architecture
+## Platform Architecture
 
-The system follows a **layered ELT architecture**.
+Bronze → Silver → Gold
 
-```
-External Data Sources
-        ↓
-Bronze Layer (Raw)
-        ↓
-Silver Layer (Conformed Warehouse)
-        ↓
-Gold Layer (Analytical Marts)
-```
+### Bronze
 
----
+Raw ingestion layer
 
-# Core Analytical Grain
+Sources:
 
-```
-country_iso3
-year
-```
+WDI WPP V‑Dem
 
-This grain enables consistent joins across domains.
+### Silver
 
----
+Domain‑specific conformed fact tables.
 
-# Conformed Schema
+### Gold
 
-The platform enforces a **Country-Year Conformed Schema**.
+Integrated modelling dataset.
 
-Key dimensions:
+### Diagnostic Layer
 
-```
-dim_country
-dim_year
-```
+Coverage profiling models help evaluate indicator completeness.
 
-All facts are normalized to:
+## Analytical Window
 
-```
-country_iso3
-year
-```
+1960 -- 2023
 
----
-
-# Gold Analytical Mart
-
-Primary dataset:
-
-```
-mart_world2045_features_country_year
-```
-
-Domains included:
-
-### Demographics
-
-* population
-
-### Economy
-
-* GDP
-* GDP growth
-* unemployment
-* inflation
-
-### Development
-
-* education indicators
-* internet access
-* electricity access
-
-### Health
-
-* life expectancy
-* mortality
-
-### Governance
-
-* democracy indices
-* civil liberties
-* judicial independence
-
----
-
-# Governance Indicators (Phase 2)
-
-Source:
-
-```
-V-Dem Dataset
-```
-
-Indicators integrated:
-
-```
-vdem_liberal_democracy_index
-vdem_electoral_democracy_index
-vdem_judicial_constraints_index
-vdem_civil_liberties_index
-```
-
-These provide long-range political system measurements.
-
----
-
-# Domain Roadmap
-
-Planned domains for expansion.
-
-| Domain     | Example Indicators                |
-| ---------- | --------------------------------- |
-| Education  | literacy, enrollment              |
-| Health     | mortality, disease burden         |
-| Climate    | temperature change, disaster risk |
-| Inequality | Gini coefficient                  |
-| Conflict   | conflict events                   |
-
----
-
-# Long-Term Goal
-
-Produce a dataset capable of supporting:
-
-* global development research
-* scenario modelling
-* machine learning forecasting
-* long-range geopolitical analysis
-
----
+This window provides the best overlap between major indicators.
