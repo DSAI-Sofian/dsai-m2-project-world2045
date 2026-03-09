@@ -6,12 +6,10 @@ sources:
     schema: "{{ env_var('DBT_DATASET', 'world2045_ci') }}"
     tables:
 
-      # Existing WDI tables (kept for compatibility)
       - name: bronze__wdi__observations
       - name: bronze__wdi__indicator_dim
       - name: bronze__wdi__country_dim
 
-      # New ingestion table from Phase 1 pipeline
       - name: bronze__wdi_country_year_long
         description: "World Bank WDI observations at country-year-indicator grain."
 
@@ -19,12 +17,17 @@ sources:
     schema: "{{ env_var('DBT_DATASET', 'world2045_ci') }}"
     tables:
 
-      - name: bronze__wpp2024__population_standard
+      - name: bronze__wpp2024__f01_sheet1_clean
+        description: "WPP 2024 historical estimates extract (1950-2023)."
+
+      - name: bronze__wpp2024__f01_sheet2_clean
+        description: "WPP 2024 medium projection extract (2024-2100)."
+
       - name: bronze__wpp2024__population_probabilistic
       - name: bronze__wpp2024__fertility_probabilistic
       - name: bronze__wpp2024__mortality_probabilistic
       - name: bronze__wpp2024__migration_probabilistic
-  
+
   - name: bronze
     schema: "{{ env_var('DBT_DATASET', 'world2045_ci') }}"
     tables:

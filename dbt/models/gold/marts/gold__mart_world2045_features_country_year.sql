@@ -8,7 +8,7 @@ with spine as (
         country_iso3,
         year
     from {{ ref('fact_country_year_spine') }}
-    where year <= 2045
+    where year between 1950 and 2045
 
 ),
 
@@ -28,16 +28,13 @@ wdi_long as (
         country_iso3,
         year,
         indicator_id,
-        value
+        safe_cast(value as float64) as value
     from {{ ref('silver__wdi_country_year_long') }}
     where indicator_id in (
         'NY.GDP.MKTP.CD',
         'NY.GDP.PCAP.CD',
         'NY.GDP.MKTP.KD.ZG',
-        'SL.UEM.TOTL.ZS',
         'FP.CPI.TOTL.ZG',
-        'SP.DYN.LE00.IN',
-        'SH.DYN.MORT',
         'IT.NET.USER.ZS',
         'EG.ELC.ACCS.ZS',
         'SI.POV.LMIC'
@@ -54,16 +51,37 @@ wdi_pivot as (
         max(case when indicator_id = 'NY.GDP.MKTP.CD' then value end) as gdp_current_usd,
         max(case when indicator_id = 'NY.GDP.PCAP.CD' then value end) as gdp_per_capita_current_usd,
         max(case when indicator_id = 'NY.GDP.MKTP.KD.ZG' then value end) as gdp_growth_pct,
-        max(case when indicator_id = 'SL.UEM.TOTL.ZS' then value end) as unemployment_pct,
         max(case when indicator_id = 'FP.CPI.TOTL.ZG' then value end) as inflation_cpi_pct,
-        max(case when indicator_id = 'SP.DYN.LE00.IN' then value end) as life_expectancy_years,
-        max(case when indicator_id = 'SH.DYN.MORT' then value end) as under5_mortality_per_1000,
         max(case when indicator_id = 'IT.NET.USER.ZS' then value end) as internet_users_pct,
         max(case when indicator_id = 'EG.ELC.ACCS.ZS' then value end) as access_to_electricity_pct,
         max(case when indicator_id = 'SI.POV.LMIC' then value end) as poverty_headcount_pct
 
     from wdi_long
     group by 1, 2
+
+),
+
+wdi_features as (
+
+    select
+        country_iso3,
+        year,
+        life_expectancy_years,
+        infant_mortality_per_1000,
+        under5_mortality_per_1000,
+        maternal_mortality_per_100k,
+        physicians_per_1000,
+        hospital_beds_per_1000,
+        health_expenditure_pct_gdp,
+        primary_enrollment_pct,
+        secondary_enrollment_pct,
+        tertiary_enrollment_pct,
+        education_expenditure_pct_gdp,
+        gini_index,
+        income_share_lowest_20_pct,
+        unemployment_pct,
+        youth_unemployment_pct
+    from {{ ref('silver__wdi_country_year_features') }}
 
 ),
 
@@ -99,11 +117,27 @@ select
     w.gdp_current_usd,
     w.gdp_per_capita_current_usd,
     w.gdp_growth_pct,
-    w.unemployment_pct,
+    wf.unemployment_pct,
+    wf.youth_unemployment_pct,
     w.inflation_cpi_pct,
-    w.life_expectancy_years,
-    w.under5_mortality_per_1000,
+
+    wf.life_expectancy_years,
+    wf.infant_mortality_per_1000,
+    wf.under5_mortality_per_1000,
+    wf.maternal_mortality_per_100k,
+    wf.physicians_per_1000,
+    wf.hospital_beds_per_1000,
+    wf.health_expenditure_pct_gdp,
+
+    wf.primary_enrollment_pct,
+    wf.secondary_enrollment_pct,
+    wf.tertiary_enrollment_pct,
+    wf.education_expenditure_pct_gdp,
     e.secondary_enrollment_gross_pct,
+
+    wf.gini_index,
+    wf.income_share_lowest_20_pct,
+
     w.internet_users_pct,
     w.access_to_electricity_pct,
     w.poverty_headcount_pct,
@@ -115,9 +149,12 @@ select
 
     p.population_total is not null as population_available,
     w.gdp_current_usd is not null as gdp_available,
-    w.life_expectancy_years is not null as life_expectancy_available,
-    e.secondary_enrollment_gross_pct is not null as secondary_enrollment_available,
+    wf.life_expectancy_years is not null as life_expectancy_available,
+    wf.secondary_enrollment_pct is not null as secondary_enrollment_available,
     w.internet_users_pct is not null as internet_available,
+
+    wf.gini_index is not null as inequality_available,
+    wf.health_expenditure_pct_gdp is not null as health_available,
 
     g.country_iso3 is not null as governance_available,
     g.vdem_liberal_democracy_index is not null as vdem_liberal_democracy_available,
@@ -132,6 +169,9 @@ left join population p
 left join wdi_pivot w
     on s.country_iso3 = w.country_iso3
    and s.year = w.year
+left join wdi_features wf
+    on s.country_iso3 = wf.country_iso3
+   and s.year = wf.year
 left join education e
     on s.country_iso3 = e.country_iso3
    and s.year = e.year

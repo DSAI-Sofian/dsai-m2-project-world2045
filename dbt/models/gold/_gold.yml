@@ -1,9 +1,17 @@
 version: 2
 
 models:
-  - name: mart_world2045_features_country_year
+  - name: gold__mart_world2045_features_country_year
     description: >
-      Country-year analytical mart for World in 2045 modeling and forecasting.
+      Country-year analytical mart for World2045 modeling, forecasting,
+      and comparative development analysis across population, economy,
+      health, education, inequality, infrastructure, and governance.
+
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            - country_iso3
+            - year
 
     columns:
       - name: country_iso3
@@ -36,7 +44,11 @@ models:
 
       - name: unemployment_pct
         data_type: numeric
-        description: "Unemployment rate percent."
+        description: "Total unemployment rate percent."
+
+      - name: youth_unemployment_pct
+        data_type: numeric
+        description: "Youth unemployment rate percent for ages 15-24."
 
       - name: inflation_cpi_pct
         data_type: numeric
@@ -46,13 +58,57 @@ models:
         data_type: numeric
         description: "Life expectancy at birth in years."
 
+      - name: infant_mortality_per_1000
+        data_type: numeric
+        description: "Infant mortality rate per 1,000 live births."
+
       - name: under5_mortality_per_1000
         data_type: numeric
-        description: "Under-5 mortality per 1,000 live births."
+        description: "Under-5 mortality rate per 1,000 live births."
+
+      - name: maternal_mortality_per_100k
+        data_type: numeric
+        description: "Maternal mortality ratio per 100,000 live births."
+
+      - name: physicians_per_1000
+        data_type: numeric
+        description: "Physicians per 1,000 people."
+
+      - name: hospital_beds_per_1000
+        data_type: numeric
+        description: "Hospital beds per 1,000 people."
+
+      - name: health_expenditure_pct_gdp
+        data_type: numeric
+        description: "Current health expenditure as a percent of GDP."
+
+      - name: primary_enrollment_pct
+        data_type: numeric
+        description: "Primary school enrollment percent."
+
+      - name: secondary_enrollment_pct
+        data_type: numeric
+        description: "Secondary school enrollment percent."
+
+      - name: tertiary_enrollment_pct
+        data_type: numeric
+        description: "Tertiary school enrollment percent."
+
+      - name: education_expenditure_pct_gdp
+        data_type: numeric
+        description: "Government expenditure on education as a percent of GDP."
 
       - name: secondary_enrollment_gross_pct
         data_type: numeric
-        description: "Gross secondary enrollment percent."
+        description: "Gross secondary enrollment percent from the education fact table."
+
+      - name: gini_index
+        data_type: numeric
+        description: "Gini index measuring income inequality."
+
+      - name: income_share_lowest_20_pct
+        data_type: numeric
+        description: "Income share held by the lowest 20 percent of the population."
 
       - name: internet_users_pct
         data_type: numeric
@@ -94,9 +150,21 @@ models:
         data_type: bool
         description: "True when life expectancy data is available for the country-year."
 
+      - name: secondary_enrollment_available
+        data_type: bool
+        description: "True when secondary enrollment data is available for the country-year."
+
       - name: internet_available
         data_type: bool
         description: "True when internet usage data is available for the country-year."
+
+      - name: inequality_available
+        data_type: bool
+        description: "True when at least one inequality indicator is available for the country-year."
+
+      - name: health_available
+        data_type: bool
+        description: "True when at least one health expenditure or health system indicator is available for the country-year."
 
       - name: governance_available
         data_type: bool
@@ -118,8 +186,26 @@ models:
         data_type: bool
         description: "True when civil liberties index is populated."
 
-      - name: secondary_enrollment_gross_pct
-        data_type: numeric
+  - name: gold__profile_indicator_coverage_by_year
+    description: >
+      Year-level coverage profile for key World2045 gold mart indicators across
+      the full country-year spine.
 
-      - name: secondary_enrollment_available
-        data_type: bool
+    columns:
+      - name: year
+        data_type: int64
+        tests:
+          - not_null
+          - unique
+
+  - name: gold__profile_indicator_coverage_by_country
+    description: >
+      Country-level coverage profile for key World2045 indicators across the
+      1960-2023 analytic slice.
+
+    columns:
+      - name: country_iso3
+        data_type: string
+        tests:
+          - not_null
+          - unique

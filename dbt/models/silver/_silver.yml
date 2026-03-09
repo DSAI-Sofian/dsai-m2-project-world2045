@@ -231,9 +231,8 @@ models:
 
   - name: silver__fact_education_country_year
     description: >
-      Country-year education indicators conformed from WDI for analytical use.
-      Initial Phase 2 education model includes only indicators confirmed present
-      in the current WDI dataset.
+      Country-year education fact table derived from WDI-based enrollment and
+      education expenditure indicators for analytical use.
 
     columns:
       - name: country_iso3
@@ -256,11 +255,107 @@ models:
                 to: ref('dim_year')
                 field: year
 
+      - name: primary_enrollment_pct
+        data_type: float64
+        description: "Primary school enrollment percent."
+
+      - name: secondary_enrollment_pct
+        data_type: float64
+        description: "Secondary school enrollment percent."
+
       - name: secondary_enrollment_gross_pct
-        data_type: numeric
-        description: "WDI SE.SEC.ENRR - gross secondary school enrollment percentage."
+        data_type: float64
+        description: "Gross secondary school enrollment percent."
+
+      - name: tertiary_enrollment_pct
+        data_type: float64
+        description: "Tertiary school enrollment percent."
+
+      - name: education_expenditure_pct_gdp
+        data_type: float64
+        description: "Government expenditure on education as a percent of GDP."
 
     tests:
       - dbt_utils.unique_combination_of_columns:
-          arguments:
-            combination_of_columns: ['country_iso3', 'year']
+          combination_of_columns:
+            - country_iso3
+            - year
+
+  - name: silver__wdi_country_year_features
+    description: >
+      Pivoted WDI feature table at country-year grain for selected health,
+      education, and inequality indicators used by the World2045 gold mart.
+
+    columns:
+      - name: country_iso3
+        tests:
+          - not_null
+
+      - name: year
+        tests:
+          - not_null
+
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            - country_iso3
+            - year
+
+  - name: silver__fact_health_country_year
+    description: >
+      Country-year health fact table derived from conformed WDI-based health indicators.
+
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            - country_iso3
+            - year
+
+    columns:
+      - name: country_iso3
+        data_type: string
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_country')
+                field: country_iso3
+
+      - name: year
+        data_type: int64
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_year')
+                field: year
+
+  - name: silver__fact_inequality_country_year
+    description: >
+      Country-year inequality and labor stress fact table derived from WDI-based
+      inequality, poverty, and unemployment indicators.
+
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            - country_iso3
+            - year
+
+    columns:
+      - name: country_iso3
+        data_type: string
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_country')
+                field: country_iso3
+
+      - name: year
+        data_type: int64
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_year')
+                field: year

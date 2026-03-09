@@ -12,14 +12,14 @@ with spine as (
 
 ),
 
-education as (
+inequality as (
 
     select
         country_iso3,
         year,
-        max(safe_cast(value as float64)) as secondary_enrollment_gross_pct
+        max(safe_cast(value as float64)) as poverty_headcount_pct
     from {{ ref('silver__wdi_country_year_long') }}
-    where indicator_id = 'SE.SEC.ENRR'
+    where indicator_id = 'SI.POV.LMIC'
     group by 1, 2
 
 )
@@ -27,9 +27,9 @@ education as (
 select
     s.country_iso3,
     s.year,
-    e.secondary_enrollment_gross_pct
+    i.poverty_headcount_pct
 
 from spine s
-left join education e
-    on s.country_iso3 = e.country_iso3
-   and s.year = e.year
+left join inequality i
+    on s.country_iso3 = i.country_iso3
+   and s.year = i.year

@@ -14,28 +14,57 @@
 {% set pop_mult = 1000 %}
 {% set reprocess_years = 5 %}
 
-WITH src AS (
+WITH hist AS (
 
   SELECT
-    country_iso3,
+    iso3_alpha_code AS country_iso3,
     CAST(year AS INT64) AS year,
     variant,
-    CAST(pop_total_thousands AS FLOAT64) AS pop_total_thousands,
-    CAST(pop_male_thousands  AS FLOAT64) AS pop_male_thousands,
-    CAST(pop_female_thousands AS FLOAT64) AS pop_female_thousands
-
-  FROM {{ source('world-population-projections', 'bronze__wpp2024__population_standard') }}
-
-  WHERE variant = 'Medium'
-    AND country_iso3 IS NOT NULL
+    CAST(total_population_as_of_1_july_thousands AS FLOAT64) AS pop_total_thousands,
+    CAST(male_population_as_of_1_july_thousands AS FLOAT64) AS pop_male_thousands,
+    CAST(female_population_as_of_1_july_thousands AS FLOAT64) AS pop_female_thousands
+  FROM {{ source('world-population-projections', 'bronze__wpp2024__f01_sheet1_clean') }}
+  WHERE variant = 'Estimates'
+    AND iso3_alpha_code IS NOT NULL
     AND year IS NOT NULL
 
   {% if is_incremental() %}
-    AND year >= (
+    AND CAST(year AS INT64) >= (
       SELECT COALESCE(MAX(year), 1950) - {{ reprocess_years }}
       FROM {{ this }}
     )
   {% endif %}
+
+),
+
+proj AS (
+
+  SELECT
+    iso3_alpha_code AS country_iso3,
+    CAST(year AS INT64) AS year,
+    variant,
+    CAST(total_population_as_of_1_july_thousands AS FLOAT64) AS pop_total_thousands,
+    CAST(male_population_as_of_1_july_thousands AS FLOAT64) AS pop_male_thousands,
+    CAST(female_population_as_of_1_july_thousands AS FLOAT64) AS pop_female_thousands
+  FROM {{ source('world-population-projections', 'bronze__wpp2024__f01_sheet2_clean') }}
+  WHERE variant = 'Medium'
+    AND iso3_alpha_code IS NOT NULL
+    AND year IS NOT NULL
+
+  {% if is_incremental() %}
+    AND CAST(year AS INT64) >= (
+      SELECT COALESCE(MAX(year), 1950) - {{ reprocess_years }}
+      FROM {{ this }}
+    )
+  {% endif %}
+
+),
+
+src AS (
+
+  SELECT * FROM hist
+  UNION ALL
+  SELECT * FROM proj
 
 )
 
