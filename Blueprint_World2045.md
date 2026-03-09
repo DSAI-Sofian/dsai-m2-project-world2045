@@ -41,50 +41,33 @@ The inclusion of Climate, Conflict, Education, and Labor as "scenario-driving st
 A strategic blueprint is only as robust as its underlying evidence. We adhere to a principle of "Absolute Grounding," where every prediction is anchored in verified historical data from internationally recognized organizations.
 
 **Demographics & Population**
-
-UN World Population Prospects (WPP 2024)
-
-World Bank World Development Indicators (WDI)
+- UN World Population Prospects (WPP 2024)
+- World Bank World Development Indicators (WDI)
 
 **Governance & Political Development**
-
-V-Dem (Varieties of Democracy)
+- V-Dem (Varieties of Democracy)
 
 Polity Project
-
-Worldwide Governance Indicators (WGI)
+- Worldwide Governance Indicators (WGI)
 
 **Quality of Life & Health**
-
-UNDP Human Development Index (HDI)
-
-World Happiness Report / Gallup
-
-WHO Global Health Observatory (GHO): HALE (Health Adjusted Life Expectancy)
-
-IHME Global Burden of Disease (GBD)
+- UNDP Human Development Index (HDI)
+- World Happiness Report / Gallup
+- WHO Global Health Observatory (GHO): HALE (Health Adjusted Life Expectancy)
+- IHME Global Burden of Disease (GBD)
 
 **Macroeconomics & Inequality**
-
-IMF World Economic Outlook (WEO)
-
-World Bank World Development Indicators (WDI)
-
-OECD Data
-
-World Inequality Database (WID)
+- IMF World Economic Outlook (WEO)
+- World Bank World Development Indicators (WDI)
+- OECD Data
+- World Inequality Database (WID)
 
 **Tech, Climate, & Human Capital**
-
-ITU ICT Statistics & WIPO Innovation Data
-
-IPCC, UNFCCC, NASA GISS, and Germanwatch Climate Risk Indices
-
-UCDP Conflict Data & SIPRI Military Expenditure Database
-
-UNESCO Institute for Statistics & OECD PISA (Program for International Student Assessment)
-
-ILOSTAT (International Labour Organization)
+- ITU ICT Statistics & WIPO Innovation Data
+- IPCC, UNFCCC, NASA GISS, and Germanwatch Climate Risk Indices
+- UCDP Conflict Data & SIPRI Military Expenditure Database
+- UNESCO Institute for Statistics & OECD PISA (Program for International Student Assessment)
+- ILOSTAT (International Labour Organization)
 
 This diverse data inventory is ingested into a technical infrastructure designed to handle large-scale SQL transformations while maintaining a rigorous audit trail.
 
