@@ -1,16 +1,3 @@
----
-exported: 2026-03-09T14:09:12.280Z
-source: NotebookLM
-type: report
-title: "World in 2045 Blueprint: A Data-Driven Global Strategic Report"
----
-
-# World in 2045 Blueprint: A Data-Driven Global Strategic Report
-
-导出时间: 3/9/2026, 10:09:12 PM
-
----
-
 # World in 2045 Blueprint: A Data-Driven Global Strategic Report
 
 ### 1\. Strategic Vision and Methodology
