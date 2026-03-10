@@ -31,5 +31,12 @@ sources:
   - name: bronze
     schema: "{{ env_var('DBT_DATASET', 'world2045_ci') }}"
     tables:
+
       - name: vdem_country_year
         description: "Conformed bronze governance extract from V-Dem at country-year grain."
+
+      - name: nd_gain_country_year
+        description: "ND-GAIN climate vulnerability, readiness, and resilience index at country-year grain (1995-present)."
+
+      - name: ucdp_conflict_country_year
+        description: "UCDP conflict country-year bronze table with conflict type, intensity, and battle deaths."

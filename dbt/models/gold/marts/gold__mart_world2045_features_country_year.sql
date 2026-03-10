@@ -106,6 +106,33 @@ governance as (
         vdem_civil_liberties_index
     from {{ ref('silver__fact_governance_country_year') }}
 
+),
+
+climate as (
+
+    select
+        country_iso3,
+        year,
+        ndgain_index,
+        climate_vulnerability,
+        adaptation_readiness
+    from {{ ref('silver__fact_climate_risk_country_year') }}
+
+),
+
+conflict as (
+
+    select
+        country_iso3,
+        year,
+        battle_deaths,
+        conflict_incidence,
+        interstate_conflict,
+        civil_conflict,
+        internationalized_conflict,
+        war_intensity
+    from {{ ref('silver__fact_conflict_country_year') }}
+
 )
 
 select
@@ -147,6 +174,17 @@ select
     g.vdem_judicial_constraints_index,
     g.vdem_civil_liberties_index,
 
+    c.ndgain_index,
+    c.climate_vulnerability,
+    c.adaptation_readiness,
+
+    f.battle_deaths,
+    f.conflict_incidence,
+    f.interstate_conflict,
+    f.civil_conflict,
+    f.internationalized_conflict,
+    f.war_intensity,
+
     p.population_total is not null as population_available,
     w.gdp_current_usd is not null as gdp_available,
     wf.life_expectancy_years is not null as life_expectancy_available,
@@ -160,7 +198,10 @@ select
     g.vdem_liberal_democracy_index is not null as vdem_liberal_democracy_available,
     g.vdem_electoral_democracy_index is not null as vdem_electoral_democracy_available,
     g.vdem_judicial_constraints_index is not null as vdem_judicial_constraints_available,
-    g.vdem_civil_liberties_index is not null as vdem_civil_liberties_available
+    g.vdem_civil_liberties_index is not null as vdem_civil_liberties_available,
+
+    c.ndgain_index is not null as climate_available,
+    f.conflict_incidence is not null as conflict_available
 
 from spine s
 left join population p
@@ -178,3 +219,9 @@ left join education e
 left join governance g
     on s.country_iso3 = g.country_iso3
    and s.year = g.year
+left join climate c
+    on s.country_iso3 = c.country_iso3
+   and s.year = c.year
+left join conflict f
+    on s.country_iso3 = f.country_iso3
+   and s.year = f.year

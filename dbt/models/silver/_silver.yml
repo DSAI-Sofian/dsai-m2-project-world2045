@@ -359,3 +359,49 @@ models:
               arguments:
                 to: ref('dim_year')
                 field: year
+
+  - name: silver__fact_climate_risk_country_year
+    description: Country-year climate risk fact from ND-GAIN.
+    columns:
+      - name: country_iso3
+        tests:
+          - not_null
+
+      - name: year
+        tests:
+          - not_null
+
+      - name: ndgain_index
+
+      - name: climate_vulnerability
+
+      - name: adaptation_readiness
+
+  - name: silver__fact_conflict_country_year
+    description: Country-year conflict risk fact from UCDP.
+    columns:
+      - name: country_iso3
+        tests:
+          - not_null
+
+      - name: year
+        tests:
+          - not_null
+
+      - name: battle_deaths
+        description: Best estimate of battle-related deaths in the country-year.
+
+      - name: conflict_incidence
+        description: Indicator for at least one recorded armed conflict in the country-year.
+
+      - name: interstate_conflict
+        description: Indicator for interstate conflict in the country-year.
+
+      - name: civil_conflict
+        description: Indicator for internal conflict in the country-year.
+
+      - name: internationalized_conflict
+        description: Indicator for internationalized internal conflict in the country-year.
+
+      - name: war_intensity
+        description: Indicator for war-intensity conflict in the country-year.
