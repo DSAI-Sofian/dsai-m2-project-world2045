@@ -23,34 +23,43 @@ models:
 
       - name: country_name_official
         data_type: string
+
       - name: country_iso2
         data_type: string
+
       - name: country_numeric
         data_type: string
+
       - name: region
         data_type: string
+
       - name: subregion
         data_type: string
+
       - name: income_group
         data_type: string
 
       - name: is_sovereign
         data_type: bool
+
       - name: is_disputed
         data_type: bool
 
       - name: valid_from_year
         data_type: int64
+
       - name: valid_to_year
         data_type: int64
 
       - name: predecessor_iso3
         data_type: string
+
       - name: successor_iso3
         data_type: string
 
       - name: created_at
         data_type: timestamp
+
       - name: updated_at
         data_type: timestamp
 
@@ -76,6 +85,7 @@ models:
 
       - name: created_at
         data_type: timestamp
+
       - name: updated_at
         data_type: timestamp
 
@@ -113,6 +123,7 @@ models:
 
       - name: created_at
         data_type: timestamp
+
       - name: updated_at
         data_type: timestamp
 
@@ -133,7 +144,6 @@ models:
       Cleaned World Development Indicators dataset at country-year-indicator grain.
       Materialized as `silver__wdi_country_year_long` in the dataset defined by
       `DBT_DATASET` (or `target.dataset`).
-
     columns:
       - name: source_system
         data_type: string
@@ -182,58 +192,58 @@ models:
       - dbt_utils.unique_combination_of_columns:
           arguments:
             combination_of_columns: ['country_iso3', 'year', 'indicator_id']
-  
+
   - name: silver__fact_governance_country_year
     description: >
-      Country-year governance indicators conformed from V-Dem for analytical use. Materialized as `silver__fact_governance_country_year` in the dataset defined by `DBT_DATASET` (or `target.dataset`).
-    
+      Country-year governance indicators conformed from V-Dem for analytical use.
+      Materialized as `silver__fact_governance_country_year` in the dataset defined
+      by `DBT_DATASET` (or `target.dataset`).
     columns:
-    - name: country_iso3
-      data_type: string
-      description: "ISO-3166-1 alpha-3 country code."
-      tests:
-        - not_null
-        - relationships:
-            arguments:
-              to: ref('dim_country')
-              field: country_iso3
+      - name: country_iso3
+        data_type: string
+        description: "ISO-3166-1 alpha-3 country code."
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_country')
+                field: country_iso3
 
-    - name: year
-      data_type: int64
-      description: "Calendar year."
-      tests:
-        - not_null
-        - relationships:
-            arguments:
-              to: ref('dim_year')
-              field: year
+      - name: year
+        data_type: int64
+        description: "Calendar year."
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_year')
+                field: year
 
-    - name: vdem_liberal_democracy_index
-      data_type: float64
-      description: "V-Dem liberal democracy index."
+      - name: vdem_liberal_democracy_index
+        data_type: float64
+        description: "V-Dem liberal democracy index."
 
-    - name: vdem_electoral_democracy_index
-      data_type: float64
-      description: "V-Dem electoral democracy index."
+      - name: vdem_electoral_democracy_index
+        data_type: float64
+        description: "V-Dem electoral democracy index."
 
-    - name: vdem_judicial_constraints_index
-      data_type: float64
-      description: "V-Dem judicial constraints index."
+      - name: vdem_judicial_constraints_index
+        data_type: float64
+        description: "V-Dem judicial constraints index."
 
-    - name: vdem_civil_liberties_index
-      data_type: float64
-      description: "V-Dem civil liberties index."
+      - name: vdem_civil_liberties_index
+        data_type: float64
+        description: "V-Dem civil liberties index."
 
     tests:
-    - dbt_utils.unique_combination_of_columns:
-        arguments:
-          combination_of_columns: ['country_iso3', 'year']
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: ['country_iso3', 'year']
 
   - name: silver__fact_education_country_year
     description: >
       Country-year education fact table derived from WDI-based enrollment and
       education expenditure indicators for analytical use.
-
     columns:
       - name: country_iso3
         data_type: string
@@ -277,15 +287,15 @@ models:
 
     tests:
       - dbt_utils.unique_combination_of_columns:
-          combination_of_columns:
-            - country_iso3
-            - year
+          arguments:
+            combination_of_columns:
+              - country_iso3
+              - year
 
   - name: silver__wdi_country_year_features
     description: >
       Pivoted WDI feature table at country-year grain for selected health,
       education, and inequality indicators used by the World2045 gold mart.
-
     columns:
       - name: country_iso3
         tests:
@@ -297,20 +307,14 @@ models:
 
     tests:
       - dbt_utils.unique_combination_of_columns:
-          combination_of_columns:
-            - country_iso3
-            - year
+          arguments:
+            combination_of_columns:
+              - country_iso3
+              - year
 
   - name: silver__fact_health_country_year
     description: >
       Country-year health fact table derived from conformed WDI-based health indicators.
-
-    tests:
-      - dbt_utils.unique_combination_of_columns:
-          combination_of_columns:
-            - country_iso3
-            - year
-
     columns:
       - name: country_iso3
         data_type: string
@@ -330,35 +334,12 @@ models:
                 to: ref('dim_year')
                 field: year
 
-  - name: silver__fact_inequality_country_year
-    description: >
-      Country-year inequality and labor stress fact table derived from WDI-based
-      inequality, poverty, and unemployment indicators.
-
     tests:
       - dbt_utils.unique_combination_of_columns:
-          combination_of_columns:
-            - country_iso3
-            - year
-
-    columns:
-      - name: country_iso3
-        data_type: string
-        tests:
-          - not_null
-          - relationships:
-              arguments:
-                to: ref('dim_country')
-                field: country_iso3
-
-      - name: year
-        data_type: int64
-        tests:
-          - not_null
-          - relationships:
-              arguments:
-                to: ref('dim_year')
-                field: year
+          arguments:
+            combination_of_columns:
+              - country_iso3
+              - year
 
   - name: silver__fact_climate_risk_country_year
     description: Country-year climate risk fact from ND-GAIN.
@@ -376,6 +357,13 @@ models:
       - name: climate_vulnerability
 
       - name: adaptation_readiness
+
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - country_iso3
+              - year
 
   - name: silver__fact_conflict_country_year
     description: Country-year conflict risk fact from UCDP.
@@ -406,26 +394,32 @@ models:
       - name: war_intensity
         description: Indicator for war-intensity conflict in the country-year.
 
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - country_iso3
+              - year
+
   - name: silver__wid_inequality_country_year
     description: >
       Conformed WID inequality distribution metrics at country-year grain,
       mapped from WID alpha2 source codes to canonical country_iso3.
       Metrics are based on pre-tax national income concepts from WID.
-
     columns:
       - name: country_iso3
         description: Canonical ISO-3166-1 alpha-3 country code.
-        data_tests:
+        tests:
           - not_null
 
       - name: year
         description: Calendar year.
-        data_tests:
+        tests:
           - not_null
 
       - name: gini_income
         description: WID pre-tax national income Gini coefficient.
-        data_tests:
+        tests:
           - dbt_utils.accepted_range:
               arguments:
                 min_value: 0
@@ -434,7 +428,7 @@ models:
 
       - name: bottom50_income_share_pct
         description: Share of pre-tax national income accruing to the bottom 50 percent.
-        data_tests:
+        tests:
           - dbt_utils.accepted_range:
               arguments:
                 min_value: 0
@@ -443,7 +437,7 @@ models:
 
       - name: top10_income_share_pct
         description: Share of pre-tax national income accruing to the top 10 percent.
-        data_tests:
+        tests:
           - dbt_utils.accepted_range:
               arguments:
                 min_value: 0
@@ -452,14 +446,14 @@ models:
 
       - name: top1_income_share_pct
         description: Share of pre-tax national income accruing to the top 1 percent.
-        data_tests:
+        tests:
           - dbt_utils.accepted_range:
               arguments:
                 min_value: 0
                 max_value: 100
                 inclusive: true
 
-    data_tests:
+    tests:
       - dbt_utils.unique_combination_of_columns:
           arguments:
             combination_of_columns:
@@ -470,21 +464,20 @@ models:
     description: >
       Conformed inequality fact table at country-year grain combining WDI
       poverty headcount with WID inequality distribution metrics.
-
     columns:
       - name: country_iso3
         description: Canonical ISO-3166-1 alpha-3 country code.
-        data_tests:
+        tests:
           - not_null
 
       - name: year
         description: Calendar year.
-        data_tests:
+        tests:
           - not_null
 
       - name: poverty_headcount_pct
         description: Poverty headcount ratio from WDI indicator SI.POV.LMIC.
-        data_tests:
+        tests:
           - dbt_utils.accepted_range:
               arguments:
                 min_value: 0
@@ -493,7 +486,7 @@ models:
 
       - name: gini_income
         description: WID pre-tax national income Gini coefficient.
-        data_tests:
+        tests:
           - dbt_utils.accepted_range:
               arguments:
                 min_value: 0
@@ -502,7 +495,7 @@ models:
 
       - name: bottom50_income_share_pct
         description: Share of pre-tax national income accruing to the bottom 50 percent.
-        data_tests:
+        tests:
           - dbt_utils.accepted_range:
               arguments:
                 min_value: 0
@@ -511,7 +504,7 @@ models:
 
       - name: top10_income_share_pct
         description: Share of pre-tax national income accruing to the top 10 percent.
-        data_tests:
+        tests:
           - dbt_utils.accepted_range:
               arguments:
                 min_value: 0
@@ -520,14 +513,14 @@ models:
 
       - name: top1_income_share_pct
         description: Share of pre-tax national income accruing to the top 1 percent.
-        data_tests:
+        tests:
           - dbt_utils.accepted_range:
               arguments:
                 min_value: 0
                 max_value: 100
                 inclusive: true
 
-    data_tests:
+    tests:
       - dbt_utils.unique_combination_of_columns:
           arguments:
             combination_of_columns:
@@ -538,25 +531,24 @@ models:
     description: >
       Conformed HDI fact table at country-year grain based on cleaned
       UNDP HDI trends data.
-
     columns:
       - name: country_iso3
-        data_tests:
+        tests:
           - not_null
 
       - name: year
-        data_tests:
+        tests:
           - not_null
 
       - name: hdi
-        data_tests:
+        tests:
           - dbt_utils.accepted_range:
               arguments:
                 min_value: 0
                 max_value: 1
                 inclusive: true
 
-    data_tests:
+    tests:
       - dbt_utils.unique_combination_of_columns:
           arguments:
             combination_of_columns:
