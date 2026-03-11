@@ -405,3 +405,160 @@ models:
 
       - name: war_intensity
         description: Indicator for war-intensity conflict in the country-year.
+
+  - name: silver__wid_inequality_country_year
+    description: >
+      Conformed WID inequality distribution metrics at country-year grain,
+      mapped from WID alpha2 source codes to canonical country_iso3.
+      Metrics are based on pre-tax national income concepts from WID.
+
+    columns:
+      - name: country_iso3
+        description: Canonical ISO-3166-1 alpha-3 country code.
+        data_tests:
+          - not_null
+
+      - name: year
+        description: Calendar year.
+        data_tests:
+          - not_null
+
+      - name: gini_income
+        description: WID pre-tax national income Gini coefficient.
+        data_tests:
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 0
+                max_value: 1
+                inclusive: true
+
+      - name: bottom50_income_share_pct
+        description: Share of pre-tax national income accruing to the bottom 50 percent.
+        data_tests:
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 0
+                max_value: 100
+                inclusive: true
+
+      - name: top10_income_share_pct
+        description: Share of pre-tax national income accruing to the top 10 percent.
+        data_tests:
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 0
+                max_value: 100
+                inclusive: true
+
+      - name: top1_income_share_pct
+        description: Share of pre-tax national income accruing to the top 1 percent.
+        data_tests:
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 0
+                max_value: 100
+                inclusive: true
+
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - country_iso3
+              - year
+
+  - name: silver__fact_inequality_country_year
+    description: >
+      Conformed inequality fact table at country-year grain combining WDI
+      poverty headcount with WID inequality distribution metrics.
+
+    columns:
+      - name: country_iso3
+        description: Canonical ISO-3166-1 alpha-3 country code.
+        data_tests:
+          - not_null
+
+      - name: year
+        description: Calendar year.
+        data_tests:
+          - not_null
+
+      - name: poverty_headcount_pct
+        description: Poverty headcount ratio from WDI indicator SI.POV.LMIC.
+        data_tests:
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 0
+                max_value: 100
+                inclusive: true
+
+      - name: gini_income
+        description: WID pre-tax national income Gini coefficient.
+        data_tests:
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 0
+                max_value: 1
+                inclusive: true
+
+      - name: bottom50_income_share_pct
+        description: Share of pre-tax national income accruing to the bottom 50 percent.
+        data_tests:
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 0
+                max_value: 100
+                inclusive: true
+
+      - name: top10_income_share_pct
+        description: Share of pre-tax national income accruing to the top 10 percent.
+        data_tests:
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 0
+                max_value: 100
+                inclusive: true
+
+      - name: top1_income_share_pct
+        description: Share of pre-tax national income accruing to the top 1 percent.
+        data_tests:
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 0
+                max_value: 100
+                inclusive: true
+
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - country_iso3
+              - year
+
+  - name: silver__fact_hdi_country_year
+    description: >
+      Conformed HDI fact table at country-year grain based on cleaned
+      UNDP HDI trends data.
+
+    columns:
+      - name: country_iso3
+        data_tests:
+          - not_null
+
+      - name: year
+        data_tests:
+          - not_null
+
+      - name: hdi
+        data_tests:
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 0
+                max_value: 1
+                inclusive: true
+
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - country_iso3
+              - year

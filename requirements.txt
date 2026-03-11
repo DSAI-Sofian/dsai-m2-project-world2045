@@ -1,0 +1,19 @@
+# Core data processing
+pandas>=2.2
+numpy>=1.26
+
+# Excel ingestion
+openpyxl>=3.1
+
+# HTTP downloads
+requests>=2.31
+
+# Environment configuration
+python-dotenv>=1.0
+
+# dbt
+dbt-core>=1.11
+dbt-bigquery>=1.11
+
+# BigQuery client (optional for ingestion utilities)
+google-cloud-bigquery>=3.25

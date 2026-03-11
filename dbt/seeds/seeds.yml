@@ -1,0 +1,7 @@
+version: 2
+
+seeds:
+  - name: wid_inequality_extract
+    description: >
+      Filtered WID inequality extract containing gini and selected
+      pre-tax income share series by percentile.

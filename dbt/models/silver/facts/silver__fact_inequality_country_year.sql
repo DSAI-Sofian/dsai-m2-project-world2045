@@ -12,7 +12,7 @@ with spine as (
 
 ),
 
-inequality as (
+wdi_inequality as (
 
     select
         country_iso3,
@@ -22,14 +22,34 @@ inequality as (
     where indicator_id = 'SI.POV.LMIC'
     group by 1, 2
 
+),
+
+wid_inequality as (
+
+    select
+        country_iso3,
+        year,
+        gini_income,
+        bottom50_income_share_pct,
+        top10_income_share_pct,
+        top1_income_share_pct
+    from {{ ref('silver__wid_inequality_country_year') }}
+
 )
 
 select
     s.country_iso3,
     s.year,
-    i.poverty_headcount_pct
+    wdi.poverty_headcount_pct,
+    wid.gini_income,
+    wid.bottom50_income_share_pct,
+    wid.top10_income_share_pct,
+    wid.top1_income_share_pct
 
 from spine s
-left join inequality i
-    on s.country_iso3 = i.country_iso3
-   and s.year = i.year
+left join wdi_inequality wdi
+    on s.country_iso3 = wdi.country_iso3
+   and s.year = wdi.year
+left join wid_inequality wid
+    on s.country_iso3 = wid.country_iso3
+   and s.year = wid.year
