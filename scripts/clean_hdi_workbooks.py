@@ -1,4 +1,5 @@
 from pathlib import Path
+import re
 import pandas as pd
 
 
@@ -47,6 +48,16 @@ def is_group_or_break_row(country: str | None) -> bool:
     return False
 
 
+def is_year_label(value) -> bool:
+    """
+    Return True when the column label is a 4-digit year such as 1990, 1991, ..., 2023.
+    """
+    if value is None:
+        return False
+    s = str(value).strip()
+    return bool(re.fullmatch(r"\d{4}", s))
+
+
 def flatten_multirow_header(header_rows: pd.DataFrame) -> list[str]:
     """
     Flatten a multi-row header by taking the last non-null token in each column.
@@ -66,14 +77,11 @@ def flatten_multirow_header(header_rows: pd.DataFrame) -> list[str]:
             cols.append(f"col_{col_idx}")
             continue
 
-        # Prefer the last meaningful token
         final = tokens[-1]
 
-        # Normalize a few known labels
         if final == "Value":
             final = "hdi"
         elif final == "(years)":
-            # We need to disambiguate based on earlier tokens in the same column
             joined = " | ".join(tokens).lower()
             if "life expectancy" in joined:
                 final = "life_expectancy_years"
@@ -86,7 +94,6 @@ def flatten_multirow_header(header_rows: pd.DataFrame) -> list[str]:
 
         cols.append(final)
 
-    # Make duplicate column names unique
     seen = {}
     unique_cols = []
     for c in cols:
@@ -120,17 +127,14 @@ def clean_table1_hdi() -> pd.DataFrame:
     """
     raw = pd.read_excel(TABLE1_XLSX, sheet_name=TABLE1_SHEET, header=None)
 
-    # Data starts after the 3-row header block
     data = raw.iloc[7:].copy().reset_index(drop=True)
 
-    # Defensive check
     if data.shape[1] < 15:
         raise ValueError(
             f"Unexpected Table 1 column count: {data.shape[1]}. "
             "Expected at least 15 columns based on inspected workbook layout."
         )
 
-    # Positional extraction
     cleaned = pd.DataFrame({
         "hdi_rank_2023": data.iloc[:, 0],
         "country": data.iloc[:, 1],
@@ -144,18 +148,13 @@ def clean_table1_hdi() -> pd.DataFrame:
     })
 
     cleaned["country"] = cleaned["country"].map(clean_text)
-
-    # Drop section/group/break rows
     cleaned = cleaned[~cleaned["country"].map(is_group_or_break_row)].copy()
 
-    # Numeric conversion
     metric_cols = [c for c in cleaned.columns if c != "country"]
     for c in metric_cols:
         cleaned[c] = pd.to_numeric(cleaned[c], errors="coerce")
 
-    # Keep only real observation rows
     cleaned = cleaned[cleaned["hdi_2023"].notna()].copy()
-
     cleaned = cleaned.reset_index(drop=True)
     return cleaned
 
@@ -170,6 +169,9 @@ def clean_table2_hdi_trends() -> tuple[pd.DataFrame, pd.DataFrame]:
     - row 4 contains the usable header
     - data starts at row 5
     - group rows break the country list
+
+    Important:
+    - Detect ALL year columns dynamically, not only selected snapshot years.
     """
     raw = pd.read_excel(TABLE2_XLSX, sheet_name=TABLE2_SHEET, header=None)
 
@@ -183,18 +185,21 @@ def clean_table2_hdi_trends() -> tuple[pd.DataFrame, pd.DataFrame]:
     data.columns = cols
     data = data.reset_index(drop=True)
 
-    # Select/rename columns we care about
+    data["Country"] = data["Country"].map(clean_text)
+    data = data[~data["Country"].map(is_group_or_break_row)].copy()
+
+    year_cols = [c for c in data.columns if is_year_label(c)]
+    year_cols = sorted(year_cols, key=lambda x: int(str(x)))
+
+    if not year_cols:
+        raise ValueError(
+            "No year columns detected in HDI trends table. "
+            "Check the workbook structure and header row."
+        )
+
     rename_map = {
         "HDI rank": "hdi_rank_2023",
         "Country": "country",
-        "1990": "hdi_1990",
-        "2000": "hdi_2000",
-        "2010": "hdi_2010",
-        "2015": "hdi_2015",
-        "2020": "hdi_2020",
-        "2021": "hdi_2021",
-        "2022": "hdi_2022",
-        "2023": "hdi_2023",
         "2015-2023": "change_in_hdi_rank_2015_2023",
         "1990-2000": "avg_annual_hdi_growth_1990_2000_pct",
         "2000-2010": "avg_annual_hdi_growth_2000_2010_pct",
@@ -203,17 +208,15 @@ def clean_table2_hdi_trends() -> tuple[pd.DataFrame, pd.DataFrame]:
     }
     data = data.rename(columns=rename_map)
 
+    year_rename_map = {str(y): f"hdi_{y}" for y in year_cols}
+    data = data.rename(columns=year_rename_map)
+
+    hdi_year_cols = [f"hdi_{y}" for y in year_cols]
+
     wanted = [
         "country",
         "hdi_rank_2023",
-        "hdi_1990",
-        "hdi_2000",
-        "hdi_2010",
-        "hdi_2015",
-        "hdi_2020",
-        "hdi_2021",
-        "hdi_2022",
-        "hdi_2023",
+        *hdi_year_cols,
         "change_in_hdi_rank_2015_2023",
         "avg_annual_hdi_growth_1990_2000_pct",
         "avg_annual_hdi_growth_2000_2010_pct",
@@ -223,33 +226,16 @@ def clean_table2_hdi_trends() -> tuple[pd.DataFrame, pd.DataFrame]:
     present = [c for c in wanted if c in data.columns]
     data = data[present].copy()
 
-    data["country"] = data["country"].map(clean_text)
-    data = data[~data["country"].map(is_group_or_break_row)].copy()
-
-    # Numeric conversion
     metric_cols = [c for c in data.columns if c != "country"]
     for c in metric_cols:
         data[c] = pd.to_numeric(data[c], errors="coerce")
 
-    # Keep only actual rows with at least one HDI value
-    hdi_cols = [c for c in data.columns if c.startswith("hdi_")]
-    data = data[data[hdi_cols].notna().any(axis=1)].copy()
+    data = data[data[hdi_year_cols].notna().any(axis=1)].copy()
     data = data.reset_index(drop=True)
 
-    # Build long format for trends
-    trend_year_cols = [
-        "hdi_1990",
-        "hdi_2000",
-        "hdi_2010",
-        "hdi_2015",
-        "hdi_2020",
-        "hdi_2021",
-        "hdi_2022",
-        "hdi_2023",
-    ]
     long_df = data.melt(
         id_vars=["country"],
-        value_vars=trend_year_cols,
+        value_vars=hdi_year_cols,
         var_name="metric_year",
         value_name="hdi",
     )
@@ -269,12 +255,10 @@ def clean_table2_hdi_trends() -> tuple[pd.DataFrame, pd.DataFrame]:
 def main():
     OUT_DIR.mkdir(parents=True, exist_ok=True)
 
-    # Clean Table 1
     table1 = clean_table1_hdi()
     table1_out = OUT_DIR / "hdi_table1_clean.csv"
     table1.to_csv(table1_out, index=False)
 
-    # Clean Table 2
     table2_wide, table2_long = clean_table2_hdi_trends()
     table2_wide_out = OUT_DIR / "hdi_trends_table_wide_clean.csv"
     table2_long_out = OUT_DIR / "hdi_trends_table_long_clean.csv"
@@ -291,6 +275,10 @@ def main():
     print(f"  table1_clean: {len(table1):,}")
     print(f"  table2_wide_clean: {len(table2_wide):,}")
     print(f"  table2_long_clean: {len(table2_long):,}")
+
+    print("\nDetected HDI trend years:")
+    detected_years = sorted(table2_long["year"].dropna().unique().tolist())
+    print(detected_years)
 
     print("\nSample Table 1:")
     print(table1.head(10).to_string(index=False))

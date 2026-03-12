@@ -95,6 +95,31 @@ education as (
 
 ),
 
+hdi as (
+
+    select
+        country_iso3,
+        year,
+        hdi,
+        hdi_is_observed,
+        hdi_is_interpolated
+    from {{ ref('silver__fact_hdi_country_year_annualized') }}
+
+),
+
+inequality as (
+
+    select
+        country_iso3,
+        year,
+        gini_income,
+        bottom50_income_share_pct,
+        top10_income_share_pct,
+        top1_income_share_pct
+    from {{ ref('silver__fact_inequality_country_year') }}
+
+),
+
 governance as (
 
     select
@@ -165,6 +190,14 @@ select
     wf.gini_index,
     wf.income_share_lowest_20_pct,
 
+    h.hdi,
+    h.hdi_is_observed,
+    h.hdi_is_interpolated,
+    i.gini_income,
+    i.bottom50_income_share_pct,
+    i.top10_income_share_pct,
+    i.top1_income_share_pct,
+
     w.internet_users_pct,
     w.access_to_electricity_pct,
     w.poverty_headcount_pct,
@@ -191,8 +224,17 @@ select
     wf.secondary_enrollment_pct is not null as secondary_enrollment_available,
     w.internet_users_pct is not null as internet_available,
 
-    wf.gini_index is not null as inequality_available,
+    (
+        wf.gini_index is not null
+        or wf.income_share_lowest_20_pct is not null
+        or i.gini_income is not null
+        or i.bottom50_income_share_pct is not null
+        or i.top10_income_share_pct is not null
+        or i.top1_income_share_pct is not null
+    ) as inequality_available,
+
     wf.health_expenditure_pct_gdp is not null as health_available,
+    h.hdi is not null as hdi_available,
 
     g.country_iso3 is not null as governance_available,
     g.vdem_liberal_democracy_index is not null as vdem_liberal_democracy_available,
@@ -216,6 +258,12 @@ left join wdi_features wf
 left join education e
     on s.country_iso3 = e.country_iso3
    and s.year = e.year
+left join hdi h
+    on s.country_iso3 = h.country_iso3
+   and s.year = h.year
+left join inequality i
+    on s.country_iso3 = i.country_iso3
+   and s.year = i.year
 left join governance g
     on s.country_iso3 = g.country_iso3
    and s.year = g.year

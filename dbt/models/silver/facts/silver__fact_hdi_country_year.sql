@@ -9,8 +9,7 @@ with base as (
         cast(year as int64) as year,
         safe_cast(hdi as float64) as hdi
     from {{ ref('hdi_trends_table_long_clean') }}
-    where year >= 1950
-      and year <= 2045
+    where year between 1990 and 2023
 
 ),
 

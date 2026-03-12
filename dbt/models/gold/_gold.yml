@@ -5,13 +5,15 @@ models:
     description: >
       Country-year analytical mart for World2045 modeling, forecasting,
       and comparative development analysis across population, economy,
-      health, education, inequality, infrastructure, and governance.
+      health, education, inequality, infrastructure, governance,
+      climate risk, conflict, and human development.
 
     tests:
       - dbt_utils.unique_combination_of_columns:
-          combination_of_columns:
-            - country_iso3
-            - year
+          arguments:
+            combination_of_columns:
+              - country_iso3
+              - year
 
     columns:
       - name: country_iso3
@@ -104,11 +106,31 @@ models:
 
       - name: gini_index
         data_type: numeric
-        description: "Gini index measuring income inequality."
+        description: "WDI Gini index measuring income inequality."
 
       - name: income_share_lowest_20_pct
         data_type: numeric
-        description: "Income share held by the lowest 20 percent of the population."
+        description: "WDI income share held by the lowest 20 percent of the population."
+
+      - name: hdi
+        data_type: numeric
+        description: "UNDP Human Development Index at country-year grain."
+
+      - name: gini_income
+        data_type: numeric
+        description: "WID income Gini measure at country-year grain."
+
+      - name: bottom50_income_share_pct
+        data_type: numeric
+        description: "Income share received by the bottom 50 percent of the population."
+
+      - name: top10_income_share_pct
+        data_type: numeric
+        description: "Income share received by the top 10 percent of the population."
+
+      - name: top1_income_share_pct
+        data_type: numeric
+        description: "Income share received by the top 1 percent of the population."
 
       - name: internet_users_pct
         data_type: numeric
@@ -138,6 +160,42 @@ models:
         data_type: numeric
         description: "V-Dem civil liberties index at country-year grain."
 
+      - name: ndgain_index
+        data_type: numeric
+        description: "ND-GAIN overall country index."
+
+      - name: climate_vulnerability
+        data_type: numeric
+        description: "ND-GAIN climate vulnerability component."
+
+      - name: adaptation_readiness
+        data_type: numeric
+        description: "ND-GAIN adaptation readiness component."
+
+      - name: battle_deaths
+        data_type: numeric
+        description: "Estimated battle-related deaths for the country-year."
+
+      - name: conflict_incidence
+        data_type: bool
+        description: "True when at least one conflict is recorded in the country-year."
+
+      - name: interstate_conflict
+        data_type: bool
+        description: "True when interstate conflict is recorded."
+
+      - name: civil_conflict
+        data_type: bool
+        description: "True when civil conflict is recorded."
+
+      - name: internationalized_conflict
+        data_type: bool
+        description: "True when internationalized intrastate conflict is recorded."
+
+      - name: war_intensity
+        data_type: bool
+        description: "True when conflict reaches war-intensity threshold."
+
       - name: population_available
         data_type: bool
         description: "True when population data is available for the country-year."
@@ -166,6 +224,10 @@ models:
         data_type: bool
         description: "True when at least one health expenditure or health system indicator is available for the country-year."
 
+      - name: hdi_available
+        data_type: bool
+        description: "True when HDI data is available for the country-year."
+
       - name: governance_available
         data_type: bool
         description: "True when governance data is available for the country-year."
@@ -185,6 +247,100 @@ models:
       - name: vdem_civil_liberties_available
         data_type: bool
         description: "True when civil liberties index is populated."
+
+      - name: climate_available
+        data_type: bool
+        description: "True when ND-GAIN climate indicators are available."
+
+      - name: conflict_available
+        data_type: bool
+        description: "True when conflict indicators are available."
+
+  - name: gold__features_world2045_normalized_country_year
+    description: >
+      Country-year normalized feature layer for World2045.
+      Raw features are direction-aligned so that higher values indicate
+      better development outcomes, then standardized using global z-scores.
+
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - country_iso3
+              - year
+
+    columns:
+      - name: country_iso3
+        data_type: string
+        description: "ISO 3166-1 alpha-3 country code."
+        tests:
+          - not_null
+
+      - name: year
+        data_type: int64
+        description: "Calendar year."
+        tests:
+          - not_null
+
+      - name: hdi
+        data_type: numeric
+        description: "Raw Human Development Index."
+
+      - name: gini_income
+        data_type: numeric
+        description: "Raw income Gini measure."
+
+      - name: bottom50_income_share_pct
+        data_type: numeric
+        description: "Raw income share of the bottom 50 percent."
+
+      - name: top10_income_share_pct
+        data_type: numeric
+        description: "Raw income share of the top 10 percent."
+
+      - name: top1_income_share_pct
+        data_type: numeric
+        description: "Raw income share of the top 1 percent."
+
+      - name: hdi_aligned
+        data_type: numeric
+        description: "Direction-aligned HDI where higher is better."
+
+      - name: gini_income_aligned
+        data_type: numeric
+        description: "Direction-aligned Gini where higher is better after sign inversion."
+
+      - name: bottom50_income_share_pct_aligned
+        data_type: numeric
+        description: "Direction-aligned bottom 50 percent income share where higher is better."
+
+      - name: top10_income_share_pct_aligned
+        data_type: numeric
+        description: "Direction-aligned top 10 percent income share where higher is better after sign inversion."
+
+      - name: top1_income_share_pct_aligned
+        data_type: numeric
+        description: "Direction-aligned top 1 percent income share where higher is better after sign inversion."
+
+      - name: hdi_zscore
+        data_type: numeric
+        description: "Z-score normalized HDI."
+
+      - name: gini_income_zscore
+        data_type: numeric
+        description: "Z-score normalized direction-aligned Gini."
+
+      - name: bottom50_income_share_pct_zscore
+        data_type: numeric
+        description: "Z-score normalized direction-aligned bottom 50 percent income share."
+
+      - name: top10_income_share_pct_zscore
+        data_type: numeric
+        description: "Z-score normalized direction-aligned top 10 percent income share."
+
+      - name: top1_income_share_pct_zscore
+        data_type: numeric
+        description: "Z-score normalized direction-aligned top 1 percent income share."
 
   - name: gold__profile_indicator_coverage_by_year
     description: >
@@ -209,3 +365,81 @@ models:
         tests:
           - not_null
           - unique
+
+  - name: gold__mart_world2045_model_dataset
+    description: >
+      Modeling-ready country-year dataset for World2045 forecasting workflows.
+      Uses normalized development features, feature completeness scoring,
+      and train-versus-forecast usability flags.
+
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - country_iso3
+              - year
+
+    columns:
+      - name: country_iso3
+        data_type: string
+        description: "ISO 3166-1 alpha-3 country code."
+        tests:
+          - not_null
+
+      - name: year
+        data_type: int64
+        description: "Calendar year."
+        tests:
+          - not_null
+
+      - name: hdi_zscore
+        data_type: numeric
+        description: "Normalized HDI feature."
+
+      - name: gini_income_zscore
+        data_type: numeric
+        description: "Normalized income Gini feature."
+
+      - name: bottom50_income_share_pct_zscore
+        data_type: numeric
+        description: "Normalized bottom 50 percent income share feature."
+
+      - name: top10_income_share_pct_zscore
+        data_type: numeric
+        description: "Normalized top 10 percent income share feature."
+
+      - name: top1_income_share_pct_zscore
+        data_type: numeric
+        description: "Normalized top 1 percent income share feature."
+
+      - name: hdi
+        data_type: numeric
+        description: "Annualized HDI value used for transparency and auditability."
+
+      - name: hdi_is_observed
+        data_type: bool
+        description: "True when HDI is directly observed from the UNDP source."
+
+      - name: hdi_is_interpolated
+        data_type: bool
+        description: "True when HDI is derived by interpolation between observed anchor years."
+
+      - name: non_null_feature_count
+        data_type: int64
+        description: "Count of populated normalized features in the row."
+
+      - name: is_model_usable
+        data_type: bool
+        description: "True when the row passes the minimum completeness threshold for modeling."
+
+      - name: is_training_usable
+        data_type: bool
+        description: "True when the row is in the observed training period and passes completeness threshold."
+
+      - name: is_scoring_usable
+        data_type: bool
+        description: "True when the row is in the forecast period and passes completeness threshold."
+
+      - name: panel_period
+        data_type: string
+        description: "Panel segmentation label for pre-HDI, observed training, or forecast periods."
