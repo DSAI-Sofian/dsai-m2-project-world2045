@@ -18,15 +18,28 @@ sources:
     tables:
 
       - name: bronze__wpp2024__f01_sheet1_clean
-        description: "WPP 2024 historical estimates extract (1950-2023)."
+        description: "WPP 2024 historical estimates extract (1950–2023)."
 
       - name: bronze__wpp2024__f01_sheet2_clean
-        description: "WPP 2024 medium projection extract (2024-2100)."
+        description: "WPP 2024 medium projection extract (2024–2100)."
+
+      - name: bronze__wpp2024__population_standard
+        description: "WPP 2024 population indicators table including estimates and projections."
+
+      - name: bronze__wpp2024__population_standard_raw
+        description: "Raw WPP 2024 demographic indicators table containing fertility, life expectancy, migration and other fields."
 
       - name: bronze__wpp2024__population_probabilistic
+        description: "WPP 2024 probabilistic population projections."
+
       - name: bronze__wpp2024__fertility_probabilistic
+        description: "WPP 2024 probabilistic fertility projections."
+
       - name: bronze__wpp2024__mortality_probabilistic
+        description: "WPP 2024 probabilistic mortality projections."
+
       - name: bronze__wpp2024__migration_probabilistic
+        description: "WPP 2024 probabilistic migration projections."
 
   - name: bronze
     schema: "{{ env_var('DBT_DATASET', 'world2045_ci') }}"
@@ -40,3 +53,9 @@ sources:
 
       - name: ucdp_conflict_country_year
         description: "UCDP conflict country-year bronze table with conflict type, intensity, and battle deaths."
+
+  - name: world2045_ci
+    database: project-93ce72dd-0a39-4d93-bf5
+    schema: world2045_ci
+    tables:
+      - name: bronze__wpp2024__population_standard

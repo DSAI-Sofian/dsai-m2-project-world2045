@@ -1,0 +1,30 @@
+version: 2
+
+models:
+  - name: gold__forecast_feature_country_year
+    description: "Forecast-ready demographic features derived from WPP projections."
+
+    columns:
+      - name: country_iso3
+        tests:
+          - not_null
+
+      - name: year
+        tests:
+          - not_null
+
+      - name: scenario_id
+        tests:
+          - not_null
+
+      - name: projection_variant
+        tests:
+          - not_null
+
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - country_iso3
+              - year
+              - projection_variant

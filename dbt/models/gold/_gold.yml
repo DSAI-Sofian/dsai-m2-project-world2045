@@ -443,3 +443,30 @@ models:
       - name: panel_period
         data_type: string
         description: "Panel segmentation label for pre-HDI, observed training, or forecast periods."
+
+  - name: gold__population_country_year_unified
+    description: "Unified observed and projected population country-year mart based on WPP 2024 estimates and medium-variant projections."
+
+    columns:
+      - name: country_iso3
+        tests:
+          - not_null
+
+      - name: year
+        tests:
+          - not_null
+
+      - name: data_status
+        tests:
+          - not_null
+
+      - name: source_system
+        tests:
+          - not_null
+
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - country_iso3
+              - year
