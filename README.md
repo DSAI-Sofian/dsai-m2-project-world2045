@@ -1,62 +1,74 @@
-# World2045 Data Platform
+# World in 2045
 
-## Project Objective
+The World2045 platform analyzes long‑term global development trajectories across countries from 1950–2045.  
 
-Build a multi‑domain analytical platform to study long‑term global
-development trends and model plausible trajectories toward the year
-2045.
+The platform integrates multiple global datasets including population, economic indicators, inequality metrics, governance indicators, climate vulnerability, conflict data, and human development indices.
 
-The platform integrates demographic, economic, social, governance, and
-risk indicators into a unified **country‑year analytical mart**.
+## Objectives
 
-## Architecture
+1. Analyze past data (post–World War 2)
+2. Review historical trends to predict future development
+3. Develop a snapshot of the world in 2045
+4. Propose actions to encourage positive growth and remediate negative trajectories
 
-Bronze → Silver → Gold
+## Technology Stack
 
-**Bronze** Raw ingested datasets: - World Development Indicators (WDI) -
-UN World Population Prospects (WPP) - V‑Dem Governance Dataset
+| Layer | Technology |
+|------|------------|
+| Storage | BigQuery |
+| Transformation | dbt |
+| CI/CD | GitHub Actions |
+| Orchestration | Python pipelines |
+| Version Control | Git + GitHub |
 
-**Silver** Conformed domain facts and dimensions:
+## Platform Architecture
 
-Dimensions - dim_country - dim_year
+The warehouse follows a **modern ELT layered architecture**.
 
-Spine - fact_country_year_spine
+```
+Raw Data Sources
+       ↓
+Bronze Layer
+(raw ingestion)
+       ↓
+Silver Layer
+(conformed normalized warehouse)
+       ↓
+Gold Layer
+(analytical feature marts)
+```
 
-Domain facts - silver\_\_fact_population_country_year -
-silver\_\_fact_governance_country_year -
-silver\_\_fact_health_country_year -
-silver\_\_fact_education_country_year -
-silver\_\_fact_inequality_country_year
+## Repository Structure
 
-Indicator transformation - silver\_\_wdi_country_year_long -
-silver\_\_wdi_country_year_features
+## Domains Integrated
 
-**Gold** Integrated analytical mart
+- Population (UN WPP)
+- Economy (WDI)
+- Inequality (WID)
+- Human Development (HDI)
+- Governance (V‑Dem)
+- Climate (ND‑GAIN)
+- Conflict (UCDP)
 
--   gold\_\_mart_world2045_features_country_year
--   gold\_\_mart_world2045_features_analytic_1960_2023
+## Current Status
 
-Diagnostics - gold\_\_profile_indicator_coverage_by_year -
-gold\_\_profile_indicator_coverage_by_country
+---
 
-## Analytical Window
+More details are available in TECHNICAL_README.MD
 
-Dense indicator overlap: 1960 -- 2023
+It provides detailed information on each of the sections below to guide developers and users working on the World2045 data platform.
 
-Population projections extend to: 2100
+It covers various aspects such as:
 
-## Current Domain Coverage
-
-Population -- WPP\
-Economy -- WDI GDP indicators\
-Health -- life expectancy, mortality indicators\
-Education -- secondary enrollment\
-Inequality -- poverty headcount ratio\
-Governance -- V‑Dem indices
-
-## Next Phase
-
-Phase 3 -- Risk Domains
-
-1.  Climate risk
-2.  Conflict / geopolitical instability
+- Environment setup
+- Naming conventions
+- Partition strategy
+- Data models
+- Technology stack components
+- dbt structure
+- Python ingestion framework
+- Development workflow
+- Layers (Bronze, Silver, Gold)
+- Ingestion best practices
+- dbt testing strategy
+- Future technical enhancements
