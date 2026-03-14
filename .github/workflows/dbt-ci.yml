@@ -16,9 +16,10 @@ jobs:
       KEYFILE_PATH: /home/runner/work/_temp/gcp-sa.json
       DBT_TARGET: ci
       DBT_DATASET: world2045_ci
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
-      - name: Checkout
+      - name: Checkout repo
         uses: actions/checkout@v4
 
       - name: Set up Python
