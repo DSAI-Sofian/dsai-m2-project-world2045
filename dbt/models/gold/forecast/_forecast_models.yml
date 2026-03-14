@@ -2,7 +2,14 @@ version: 2
 
 models:
   - name: gold__forecast_feature_country_year
-    description: "Forecast-ready demographic features derived from WPP projections."
+    description: "Forecast-period country-year feature mart with demographic and GDP projection features."
+
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - country_iso3
+              - year
 
     columns:
       - name: country_iso3
@@ -13,18 +20,11 @@ models:
         tests:
           - not_null
 
-      - name: scenario_id
-        tests:
-          - not_null
-
-      - name: projection_variant
-        tests:
-          - not_null
-
-    tests:
-      - dbt_utils.unique_combination_of_columns:
-          arguments:
-            combination_of_columns:
-              - country_iso3
-              - year
-              - projection_variant
+      - name: population_total_thousands
+      - name: population_male_thousands
+      - name: population_female_thousands
+      - name: fertility_rate
+      - name: life_expectancy_birth_both
+      - name: net_migrants_thousands
+      - name: gdp_real_billion_usd
+      - name: gdp_real_per_capita_usd
