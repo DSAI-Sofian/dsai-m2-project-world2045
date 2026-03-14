@@ -1,0 +1,25 @@
+version: 2
+
+models:
+  - name: silver__stg_ssp_gdp_projection
+    description: "Staging model for SSP GDP projection data prepared from the IIASA/OECD Env-Growth extract."
+
+    columns:
+      - name: country_name
+        description: "Country name from the processed SSP GDP source."
+        tests:
+          - not_null
+
+      - name: year
+        description: "Projection year from the SSP GDP source."
+        tests:
+          - not_null
+
+      - name: scenario_name
+        description: "Scenario identifier from the SSP GDP source."
+
+      - name: model_name
+        description: "Projection model name from the SSP GDP source."
+
+      - name: gdp_real_billion_usd
+        description: "Projected GDP level in billions of constant USD."

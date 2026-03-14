@@ -54,6 +54,9 @@ sources:
       - name: ucdp_conflict_country_year
         description: "UCDP conflict country-year bronze table with conflict type, intensity, and battle deaths."
 
+      - name: bronze__ssp_gdp_projection_raw
+        description: "Raw SSP GDP projection table for forecast-period economic features."
+
   - name: world2045_ci
     database: project-93ce72dd-0a39-4d93-bf5
     schema: world2045_ci

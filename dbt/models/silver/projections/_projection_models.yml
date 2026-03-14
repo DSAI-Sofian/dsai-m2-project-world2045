@@ -32,29 +32,61 @@ models:
               - year
               - projection_variant
 
-# - name: silver__projection_gdp_country_year
-#   description: Country-year GDP projections normalized from SSP scenario data.
-#   columns:
-#     - name: country_iso3
-#       tests:
-#         - not_null
-#     - name: year
-#       tests:
-#         - not_null
-#     - name: scenario_id
-#       tests:
-#         - not_null
-#     - name: metric_id
-#       tests:
-#         - not_null
-#   tests:
-#     - dbt_utils.unique_combination_of_columns:
-#          arguments:
-  #         combination_of_columns:
-#             - country_iso3
-#             - year
-#             - scenario_id
-#             - metric_id
+  - name: silver__projection_gdp_country_year
+    description: "Conformed SSP2 GDP projection model at country-year grain using processed IIASA/OECD Env-Growth GDP projections."
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - country_iso3
+              - year
+
+    columns:
+      - name: country_iso3
+        description: "Canonical ISO3 country code."
+        tests:
+          - not_null
+
+      - name: year
+        description: "Projection year."
+        tests:
+          - not_null
+
+      - name: scenario_name
+        description: "Scenario retained from the SSP GDP source."
+
+      - name: model_name
+        description: "Projection model retained from the SSP GDP source."
+
+      - name: gdp_real_billion_usd
+        description: "Projected GDP level in billions of constant USD."
+
+  - name: silver__projection_gdp_country_year_annualized
+    description: "Annualized GDP projection model for 2025-2045 using linear interpolation between 5-year SSP2 GDP anchor points."
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - country_iso3
+              - year
+
+    columns:
+      - name: country_iso3
+        tests:
+          - not_null
+
+      - name: year
+        tests:
+          - not_null
+
+      - name: gdp_real_billion_usd
+        description: "Interpolated annual GDP projection in billions of constant USD."
+
+      - name: scenario_name
+        description: "Scenario retained from the SSP GDP source."
+
+      - name: model_name
+        description: "Projection model retained from the SSP GDP source."
 #
 #  - name: silver__projection_climate_country_year
 #    description: Country-year climate scenario features normalized into a conformed projection schema.

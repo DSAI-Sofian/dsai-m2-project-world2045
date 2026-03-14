@@ -1,27 +1,51 @@
+{{ config(materialized='table') }}
+
 with population_projection as (
+
+    select *
+    from {{ ref('silver__projection_population_country_year') }}
+
+),
+
+gdp_projection as (
 
     select
         country_iso3,
         year,
-        scenario_id,
-        projection_variant,
+        gdp_real_billion_usd
+    from {{ ref('silver__projection_gdp_country_year_annualized') }}
 
-        population_total_thousands,
-        population_male_thousands,
-        population_female_thousands,
+),
 
-        population_total_thousands * 1000 as population_total,
-        population_male_thousands * 1000 as population_male,
-        population_female_thousands * 1000 as population_female,
+final as (
 
-        fertility_rate,
-        life_expectancy_birth_both,
-        net_migrants_thousands,
+    select
+        p.country_iso3,
+        p.year,
 
-        'WPP_2024' as source_system
-    from {{ ref('silver__projection_population_country_year') }}
+        p.population_total_thousands,
+        p.population_male_thousands,
+        p.population_female_thousands,
+        p.fertility_rate,
+        p.life_expectancy_birth_both,
+        p.net_migrants_thousands,
+
+        g.gdp_real_billion_usd,
+
+        case
+            when p.population_total_thousands is not null
+             and p.population_total_thousands != 0
+             and g.gdp_real_billion_usd is not null
+            then (g.gdp_real_billion_usd * 1000000) / p.population_total_thousands
+            else null
+        end as gdp_real_per_capita_usd
+
+    from population_projection p
+    left join gdp_projection g
+      on p.country_iso3 = g.country_iso3
+     and p.year = g.year
 
 )
 
 select *
-from population_projection
+from final

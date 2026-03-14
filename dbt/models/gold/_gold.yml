@@ -256,6 +256,18 @@ models:
         data_type: bool
         description: "True when conflict indicators are available."
 
+      - name: gdp_real_usd
+        description: "Projected GDP level in real USD units from SSP GDP source."
+
+      - name: gdp_growth_pct
+        description: "Projected GDP growth percentage from SSP GDP source."
+
+      - name: gdp_real_billion_usd
+        description: "Projected GDP level from SSP2 in billions of constant USD."
+
+      - name: gdp_real_per_capita_usd
+        description: "Derived projected GDP per capita in USD using projected total population."
+
   - name: gold__features_world2045_normalized_country_year
     description: >
       Country-year normalized feature layer for World2045.
@@ -470,3 +482,4 @@ models:
             combination_of_columns:
               - country_iso3
               - year
+
