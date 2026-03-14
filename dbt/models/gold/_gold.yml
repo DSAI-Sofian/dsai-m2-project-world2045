@@ -483,3 +483,37 @@ models:
               - country_iso3
               - year
 
+  - name: gold__country_trajectory_score_year
+    description: >
+      Country-year composite trajectory score combining development, governance,
+      inequality, climate risk, adaptation readiness, and conflict severity for
+      cross-country ranking from 1995 onward.
+
+    columns:
+      - name: country_iso3
+        tests:
+          - not_null
+
+      - name: year
+        tests:
+          - not_null
+
+      - name: trajectory_score
+        description: Weighted composite trajectory score for the country-year.
+
+      - name: trajectory_rank
+        description: Rank within year ordered by descending trajectory_score.
+
+      - name: trajectory_band
+        description: Tier label derived from trajectory_score.
+
+      - name: score_core_ready
+        description: >
+          Indicator that all required non-conflict core features are present for scoring.
+
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - country_iso3
+              - year
