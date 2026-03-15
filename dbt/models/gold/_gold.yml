@@ -517,3 +517,37 @@ models:
             combination_of_columns:
               - country_iso3
               - year
+
+  - name: gold__country_trajectory_score_year_scenario
+    description: >
+      Scenario-based country-year development trajectory score covering historical
+      observed years and forecast years. Forecast years use projected demographic
+      and GDP features, while governance, climate, and conflict components are
+      carried forward from the latest observed historical state under a baseline
+      static-risk assumption.
+    columns:
+      - name: country_iso3
+        tests:
+          - not_null
+
+      - name: year
+        tests:
+          - not_null
+
+      - name: scenario_id
+        tests:
+          - not_null
+
+      - name: trajectory_score
+        description: Composite development trajectory score.
+
+      - name: is_forecast_year
+        description: True for forecast years, false for historical observed years.
+
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - country_iso3
+              - year
+              - scenario_id
