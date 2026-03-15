@@ -1,0 +1,6 @@
+country_iso3,country_name,region_name,trajectory_score_2023,trajectory_score_2045,trajectory_change_2023_2045,rise_potential_score,momentum_score,quadrant,is_rankable_forecast_case,is_sovereign
+SGP,Singapore,Asia,72,76,4,5.8,5.5,Stable Advanced,True,True
+GUY,Guyana,Americas,44,63,19,9.4,9.1,Rising Challengers,True,True
+NOR,Norway,Europe,70,78,8,4.8,5.2,Future Leaders,True,True
+NGA,Nigeria,Africa,33,42,9,4.6,4.2,Structural Risk,True,True
+IND,India,Asia,48,61,13,7.0,7.1,Future Leaders,True,True

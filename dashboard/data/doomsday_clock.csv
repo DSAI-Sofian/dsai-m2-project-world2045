@@ -1,0 +1,6 @@
+snapshot_label,seconds_to_midnight,risk_factor,risk_score
+World2045 symbolic estimate,70,Climate risk,0.82
+World2045 symbolic estimate,70,Geopolitical instability,0.78
+World2045 symbolic estimate,70,AI governance risk,0.74
+World2045 symbolic estimate,70,Biosecurity risk,0.62
+World2045 symbolic estimate,70,Nuclear risk,0.71
