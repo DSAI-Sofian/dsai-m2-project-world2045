@@ -1,4 +1,4 @@
-# World2045 Streamlit Deployment Manual
+# World2045 Streamlit Deployment Training Manual
 
 This guide documents the complete process used to deploy the World2045 analytical dashboard using Streamlit and Hugging Face Spaces. It is written for learners who are new to Streamlit and provides step‑by‑step instructions including SQL validation queries, Python code, and Bash commands.
 

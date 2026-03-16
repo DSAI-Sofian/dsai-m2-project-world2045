@@ -1,4 +1,4 @@
-# World2045 Streamlit + Hugging Face Deployment Guide
+# World in 2045 Streamlit + Hugging Face Deployment Guide
 
 ## Recommended deployment choice
 Use **Hugging Face Spaces with Docker**, not the old built-in Streamlit SDK. Hugging Face officially states that the built-in Streamlit SDK is deprecated and that Streamlit apps should now be deployed via the Docker SDK.

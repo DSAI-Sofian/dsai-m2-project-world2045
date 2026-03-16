@@ -1,5 +1,5 @@
 
-# Doomsday Clock Projection for 2045
+# DOOMSDAY CLOCK PROJECTION 2045
 
 ## Background
 

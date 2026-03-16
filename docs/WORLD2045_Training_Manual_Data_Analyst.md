@@ -1,4 +1,4 @@
-# TRAINING_MANUAL
+# World in 2045 Project Training Manual
 
 ## Purpose of this manual
 

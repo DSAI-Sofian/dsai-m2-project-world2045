@@ -1,4 +1,4 @@
-# FINAL_ANALYTICAL_FINDINGS
+# FINAL ANALYTICAL FINDINGS
 
 ## Purpose of this document
 

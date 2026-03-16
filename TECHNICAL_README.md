@@ -1,4 +1,4 @@
-# TECHNICAL_README
+# TECHNICAL README
 
 - [TECHNICAL\_README](#technical_readme)
   - [Technical purpose](#technical-purpose)

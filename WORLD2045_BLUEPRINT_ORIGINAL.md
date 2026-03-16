@@ -1,4 +1,4 @@
-# World in 2045 Blueprint
+# WORLD IN 2045 BLUEPRINT (ORIGINAL)
 
 ## Goal
 Answer: **“What the world looks like in 2045”** using a strictly **data-driven** approach.

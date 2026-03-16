@@ -1,6 +1,6 @@
-# World2045
+# WORLD IN 2045
 
-World2045 is a country-year data engineering and analytics project that studies long-run development patterns from 1950 to 2045. It integrates population, economic, health, governance, climate, conflict, inequality, and human-development indicators into a unified BigQuery + dbt analytical platform.
+'World in 2045' is a country-year data engineering and analytics project that studies long-run development patterns from 1950 to 2045. It integrates population, economic, health, governance, climate, conflict, inequality, and human-development indicators into a unified BigQuery + dbt analytical platform.
 
 ## Project objective
 
