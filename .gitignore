@@ -36,6 +36,11 @@ htmlcov/
 # Jupyter
 # =========================================================
 *.ipynb
+!.ipynb_checkpoints/
+!notebooks/
+!notebooks/*.ipynb
+!main/notebook/
+!main/notebook/*.ipynb
 
 # =========================================================
 # Logs / temp / cache
@@ -101,6 +106,11 @@ data/raw/wpp2024/*.xlsx
 *.db
 *.zip
 *.gz
+
+# Allow tracked local sample data for DuckDB notebook
+!data/sample/
+!data/sample/**/
+!data/sample/**/*.parquet
 
 # IMPORTANT:
 # Do not globally ignore *.csv or all of data/,
