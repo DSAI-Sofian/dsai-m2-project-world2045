@@ -1,447 +1,353 @@
-# Technical README
+# TECHNICAL_README
 
-- [Technical README](#technical-readme)
-  - [1. Environment Setup](#1-environment-setup)
-    - [1.1 Python virtual environment](#11-python-virtual-environment)
-    - [1.2 BigQuery Dataset](#12-bigquery-dataset)
-    - [1.3 Naming Conventions](#13-naming-conventions)
-    - [1.4 Partition Strategy](#14-partition-strategy)
-    - [1.5 Canonical Keys (Grain)](#15-canonical-keys-grain)
-    - [1.6 Known Fixes Applied](#16-known-fixes-applied)
-  - [2. Architecture Overview](#2-architecture-overview)
-    - [2.1 Core Data Model](#21-core-data-model)
-    - [2.2 Country-Year Spine](#22-country-year-spine)
-  - [3. Technology Stack](#3-technology-stack)
-  - [4. dbt Structure](#4-dbt-structure)
-  - [5. Python Ingestion Framework](#5-python-ingestion-framework)
-    - [5.1 Ingestion Pattern](#51-ingestion-pattern)
-    - [5.2 Scripts](#52-scripts)
-  - [6. Development Workflow](#6-development-workflow)
-  - [7. Bronze Layer](#7-bronze-layer)
-    - [7.1 Current Bronze Outputs](#71-current-bronze-outputs)
-  - [8. Silver Layer Models](#8-silver-layer-models)
-    - [8.1 Silver Facts](#81-silver-facts)
-    - [8.2 Indicator Mapping](#82-indicator-mapping)
-    - [8.3 Model Pattern for Indicator-to-Feature Transformation](#83-model-pattern-for-indicator-to-feature-transformation)
-  - [9. Gold Layer](#9-gold-layer)
-    - [9.1 Primary analytical mart confirmed operational](#91-primary-analytical-mart-confirmed-operational)
-    - [9.2 Dense historical dataset for modelling](#92-dense-historical-dataset-for-modelling)
-    - [9.3 Diagnostic Models](#93-diagnostic-models)
-    - [9.4 Unified analytical dataset combination](#94-unified-analytical-dataset-combination)
-  - [10. Ingestion Best Practices](#10-ingestion-best-practices)
-    - [10.1 Inspect source files first](#101-inspect-source-files-first)
-    - [10.2 Extract minimal columns](#102-extract-minimal-columns)
-    - [10.3 Avoid high memory loads](#103-avoid-high-memory-loads)
-    - [10.4 Validate schema before dbt](#104-validate-schema-before-dbt)
-  - [11. dbt Testing Strategy](#11-dbt-testing-strategy)
-    - [11.1 Tests implemented](#111-tests-implemented)
-  - [12. Future Technical Enhancements](#12-future-technical-enhancements)
+- [TECHNICAL\_README](#technical_readme)
+  - [Technical purpose](#technical-purpose)
+  - [Platform stack](#platform-stack)
+  - [Repository design principles](#repository-design-principles)
+  - [Warehouse design](#warehouse-design)
+    - [Bronze](#bronze)
+    - [Silver](#silver)
+    - [Gold](#gold)
+  - [Country conformance](#country-conformance)
+  - [Core analytical mart](#core-analytical-mart)
+    - [`gold__mart_world2045_features_country_year`](#gold__mart_world2045_features_country_year)
+  - [Forecast feature mart](#forecast-feature-mart)
+    - [`gold__forecast_feature_country_year`](#gold__forecast_feature_country_year)
+  - [Historical trajectory model](#historical-trajectory-model)
+    - [`gold__country_trajectory_score_year`](#gold__country_trajectory_score_year)
+  - [Forecast trajectory scenario model](#forecast-trajectory-scenario-model)
+    - [`gold__country_trajectory_score_year_scenario`](#gold__country_trajectory_score_year_scenario)
+  - [Regional aggregation models](#regional-aggregation-models)
+    - [`gold__region_trajectory_score_year`](#gold__region_trajectory_score_year)
+    - [`gold__subregion_trajectory_score_year`](#gold__subregion_trajectory_score_year)
+  - [Strategic ranking models](#strategic-ranking-models)
+    - [`gold__country_rise_potential`](#gold__country_rise_potential)
+    - [`gold__country_trajectory_momentum`](#gold__country_trajectory_momentum)
+    - [`gold__trajectory_country_quadrant`](#gold__trajectory_country_quadrant)
+  - [Dashboard-ready support marts](#dashboard-ready-support-marts)
+  - [Important validation results locked in](#important-validation-results-locked-in)
+  - [Indicator Dictionary](#indicator-dictionary)
+  - [Methodological Limitations and Future Work](#methodological-limitations-and-future-work)
+    - [Known limitations](#known-limitations)
+    - [Methodological Limitations](#methodological-limitations)
+    - [Future Work](#future-work)
+  - [Acknowledgements](#acknowledgements)
+
+
+## Technical purpose
+
+This document records the engineering and analytical design of the World2045 platform. It is written for a technical analyst or data engineer who needs to understand how the repository is organized, how the warehouse is layered, what each model does, and how the analytical outputs were validated.
+
+## Platform stack
+
+- Warehouse: Google BigQuery
+- Transformation: dbt
+- Scripting: Python
+- CI: GitHub Actions
+- Version control: Git + GitHub
+
+## Repository design principles
+
+The project was built incrementally with these standing rules:
+
+1. inspect ZIP contents and source schema before proposing ingestion code
+2. avoid tests that depend on dbt packages not installed in the repo
+3. remain resource-aware for laptop execution
+4. validate country-year conformance early
+5. separate raw ingestion, standardized facts, and analytical marts
+
+## Warehouse design
+
+### Bronze
+Raw-landed or lightly standardized source tables.
+
+Representative examples:
+
+- `bronze__wdi_country_year_long`
+- `bronze__wpp_*`
+- climate and conflict bronze source tables
+
+### Silver
+Conformed country-year facts with normalized keys and consistent field naming.
+
+Representative examples:
+
+- `silver__projection_population_country_year`
+- `silver__projection_gdp_country_year_annualized`
+- `silver__fact_*_country_year`
+
+### Gold
+Wide feature marts and analytical scoring layers.
+
+Critical tables:
+
+- `gold__mart_world2045_features_country_year`
+- `gold__forecast_feature_country_year`
+- `gold__country_trajectory_score_year`
+- `gold__country_trajectory_score_year_scenario`
+
+## Country conformance
+
+Canonical key:
+
+- `country_iso3`
+
+Reference mapping seed:
+
+- `country_overrides`
+
+Important metadata fields in `country_overrides`:
+
+- `iso3`
+- `country_name`
+- `region`
+- `subregion`
+- `income_group`
+- `is_sovereign`
+
+## Core analytical mart
+
+### `gold__mart_world2045_features_country_year`
+
+This is the principal wide feature mart used for historical analysis.
+
+Important fields used in trajectory work:
+
+- `gdp_per_capita_current_usd`
+- `life_expectancy_years`
+- `vdem_liberal_democracy_index`
+- `adaptation_readiness`
+- `climate_vulnerability`
+- `battle_deaths`
+
+## Forecast feature mart
+
+### `gold__forecast_feature_country_year`
+
+Constructed from:
+
+- `silver__projection_population_country_year`
+- `silver__projection_gdp_country_year_annualized`
+
+Important projected fields:
+
+- `population_total_thousands`
+- `life_expectancy_birth_both`
+- `gdp_real_billion_usd`
+- `gdp_real_per_capita_usd`
+
+## Historical trajectory model
+
+### `gold__country_trajectory_score_year`
+
+Historical trajectory score for 1995-2023.
+
+Normalization approach:
+
+- per-year min-max scaling
+
+Conflict transformation:
+
+- `conflict_severity = ln(1 + battle_deaths)`
+
+Trajectory score formula:
+
+```text
+trajectory_score =
+  0.30 * gdp_pc_norm
++ 0.25 * life_expectancy_norm
++ 0.20 * governance_norm
++ 0.15 * adaptation_readiness_norm
+- 0.10 * climate_vulnerability_norm
+- 0.10 * conflict_severity_norm
+```
+
+## Forecast trajectory scenario model
+
+### `gold__country_trajectory_score_year_scenario`
+
+This model appends 2024-2045 forecast years to the historical framework.
+
+Scenario design:
+
+- `historical_observed` for 1995-2023
+- `baseline_static_risk` for 2024-2045
+
+Projected directly:
+
+- GDP per capita
+- life expectancy
+
+Carried forward from latest available historical year:
+
+- governance
+- adaptation readiness
+- climate vulnerability
+- conflict severity
+
+Additional interpretability fields:
+
+- `scenario_id`
+- `is_forecast_year`
+- `assumption_flag`
+- `forecast_score_completeness`
+
+Coverage result locked in during validation:
+
+- complete forecast cases: 150 sovereign/rankable rows in rise-potential layer
+- country-level forecast completeness summary from scenario layer: 154 complete countries, 83 partial countries
+
+## Regional aggregation models
+
+### `gold__region_trajectory_score_year`
+Region-level aggregation.
+
+### `gold__subregion_trajectory_score_year`
+Subregion-level aggregation.
+
+Important implementation note:
+
+A dbt inherited clustering config initially caused failure because the model was created with `cluster by country_iso3`, while the regional output did not include `country_iso3`. The fix was to override clustering at model level.
+
+Recommended filters for interpretability:
+
+- `d.region is not null`
+- `d.is_sovereign = true`
+
+## Strategic ranking models
+
+### `gold__country_rise_potential`
+Measures strategic position by 2045.
+
+Formula:
+
+```text
+rise_potential_score =
+  0.50 * trajectory_change_2023_2045
++ 0.35 * trajectory_score_2045
+- 0.10 * climate_vulnerability_norm_2023
+- 0.05 * conflict_severity_norm_2023
+```
+
+### `gold__country_trajectory_momentum`
+Measures relative movement / momentum.
+
+Formula:
+
+```text
+momentum_score =
+  0.70 * trajectory_change_2023_2045
++ 0.20 * trajectory_score_2045
+- 0.07 * climate_vulnerability_norm_2023
+- 0.03 * conflict_severity_norm_2023
+```
+
+### `gold__trajectory_country_quadrant`
+2x2 strategic segmentation combining 2045 score and momentum.
+
+Quadrants:
+
+- Future Leaders
+- Stable Advanced
+- Rising Challengers
+- Structural Risk
+
+Final implementation used **median thresholds** for cleaner segmentation.
+
+## Dashboard-ready support marts
+
+- `gold__trajectory_global_year`
+- `gold__trajectory_component_breakdown`
+
+These support trend charts, component decomposition charts, and country-level analytical views.
+
+## Important validation results locked in
+
+- Forecast completeness summary: `complete = 154`, `partial = 83`
+- Momentum distribution: `very_high = 1`, `moderate = 4`, `low_positive = 67`, `negative = 78`
+- Final quadrant distribution: `Future Leaders = 68`, `Structural Risk = 66`, `Rising Challengers = 8`, `Stable Advanced = 8`
+
+## Indicator Dictionary
+
+| Indicator | Description | Source |
+|----------|-------------|--------|
+| population_total | Total population | UN Population Division |
+| gdp_per_capita_current_usd | GDP per capita in current USD | World Bank |
+| life_expectancy_years | Average life expectancy | World Bank |
+| internet_users_pct | Percentage of internet users | World Bank |
+| gini_income | Income inequality (Gini coefficient) | World Inequality Database |
+| vdem_liberal_democracy_index | Governance and democracy score | V‑Dem |
+| climate_vulnerability | Climate vulnerability index | ND‑GAIN |
+| adaptation_readiness | Climate adaptation readiness | ND‑GAIN |
+| battle_deaths | Conflict battle deaths | UCDP |
 
 ---
 
-## 1. Environment Setup
+## Methodological Limitations and Future Work
 
-### 1.1 Python virtual environment
+### Known limitations
 
-* python -m venv .venv
-* source .venv/bin/activate
-
-Install dbt
-
-* pip install "dbt-core==1.11.*" "dbt-bigquery==1.11.*"
-
-dbt Profiles
-
-* profiles.yml must contain profile:
-  * world2045
-
-* Dataset controlled via environment variable:
-  * export DBT_DATASET=world2045_ci
-
-### 1.2 BigQuery Dataset
-
-* Dataset location: US
-* Dataset: world2045_ci
-
-### 1.3 Naming Conventions
-
-* Table naming pattern:
-  * layer__entity
-
-* Examples:
-  * silver__fact_population_country_year
-  * gold__mart_world2045_features_country_year
-
-### 1.4 Partition Strategy
-
-* Large fact tables partitioned by:
-  -year
-
-* Clustered by:
-  * country_iso3
-
-### 1.5 Canonical Keys (Grain)
-
-* country_iso3
-* year
-
-### 1.6 Known Fixes Applied
-
-* Resolved double-prefix naming caused by generate_alias_name macro.
+1. forward governance, climate, and conflict are baseline carry-forward rather than projected independently
+2. some countries and territories have incomplete historical component coverage
+3. regional rollups depend on ISO coverage quality in `country_overrides`
+4. normalization is relative by year, so slight negative change may still reflect strong absolute development
 
 ---
 
-## 2. Architecture Overview
+### Methodological Limitations
 
-The World2045 platform uses a layered data architecture.
+**1. Data Coverage Variability**
+Not all indicators have complete coverage across countries and time periods. Some indicators are unavailable for smaller states or earlier historical years. In such cases, the model relies on interpolation or carry‑forward methods to maintain continuity. This may introduce bias where structural changes occurred but were not captured by the available data.
 
-Layer | Description
----|---
-Bronze | Raw ingested datasets
-Silver | Cleaned and conformed datasets
-Gold | Analytical marts and modeling inputs
+**2. Forecast Assumptions**
+Forecast extensions from 2024–2045 rely on a combination of projected datasets and carry‑forward assumptions. Governance, climate vulnerability, and conflict indicators are often carried forward from the latest observed year due to limited forward projections. As a result, the forecast scenario represents a **baseline continuation scenario**, not a fully dynamic projection.
 
-### 2.1 Core Data Model
+**3. Indicator Weighting**
+The trajectory score uses weighted components representing economic, health, governance, climate, and conflict dimensions. While these weights are designed to balance structural development factors, they are ultimately subjective and may influence final rankings. Alternative weighting schemes could yield different outcomes.
 
-**Dimension Tables**
+**4.Normalization Effects**
+Indicator normalization ensures comparability across variables but can also create relative movement effects. Some countries may appear to decline slightly even if their underlying conditions improve, simply because other countries improve faster.
 
-dim_country
-
-**Canonical country dimension using **ISO-3166-1 alpha-3 codes**.
-
-Key column:
-
-```
-country_iso3
-```
-
-**Calendar year dimension**
-
-Coverage:
-
-```
-1945 → 2100
-```
-
-### 2.2 Country-Year Spine
-
-```
-fact_country_year_spine
-```
-
-This table contains **all valid country-year combinations**.
-
-Purpose:
-
-* ensures consistent joins
-* guarantees analytical grain
-* prevents missing entity-year combinations
-
-All facts must join through the spine.
+**5. Structural Persistence**
+Development trajectories often exhibit inertia. The model therefore captures gradual changes rather than abrupt structural shifts. Major geopolitical events, technological disruptions, or policy transformations could alter these trajectories significantly.
 
 ---
 
-## 3. Technology Stack
+### Future Work
 
-| Component       | Technology      |
-| --------------- | --------------- |
-| Warehouse       | Google BigQuery |
-| Transformation  | dbt             |
-| Ingestion       | Python          |
-| Version Control | GitHub          |
-| CI              | GitHub Actions  |
+Several extensions could enhance the analytical capability of the World2045 platform.
 
----
+**1.Scenario Modeling**
+Future iterations could incorporate multiple development scenarios, such as:
 
-## 4. dbt Structure
+- optimistic economic growth pathways
+- climate transition scenarios
+- governance reform trajectories
+- conflict risk escalation scenarios
 
-```
-models/
+**2. Machine Learning Forecasting**
+Instead of carry‑forward assumptions, machine learning models could generate forward projections for governance, climate resilience, and conflict indicators.
 
-bronze/  
-silver/  
-  dims/  
-  facts/  
-gold/
+**3. Monte Carlo Simulation**
+Uncertainty ranges could be incorporated using Monte Carlo simulations to produce confidence bands around trajectory scores.
 
-seeds/
+**4. Policy Sensitivity Analysis**
+Future models could estimate how specific policy interventions influence development trajectories.
 
-country_overrides.csv
-```
+**5. Expanded Indicator Coverage**
+Additional indicators could improve model robustness, including:
 
----
-
-## 5. Python Ingestion Framework
-
-```
-src/world2045/
-  ingest/
-    run_bronze.py
-    wpp.py
-    wdi.py
-  loaders/
-    bigquery.py
-  quality/
-    checks.py
-  utils/
-    io.py
-    paths.py
-```
-
-### 5.1 Ingestion Pattern
-
-1. Extract raw data
-2. Validate schema
-3. Save normalized raw files
-4. Load to Bronze tables
-
-### 5.2 Scripts
-
-* Run ingestion pipelines
-  * run_bronze.py
-
-* Load CSV outputs to BigQuery tables
-  * load_bronze_bigquery.py
+- infrastructure quality
+- infrastructure adaptation
+- energy transition metrics
+- water stress exposure
+- technological readiness
+- institutional capacity
+- food security vulnerability
+- ecosystem degradation
 
 ---
 
-## 6. Development Workflow
+## Acknowledgements
 
-Run ingestion:
-
-```
-python scripts/run_bronze.py
-```
-
-Load to BigQuery:
-
-```
-python scripts/load_bronze_bigquery.py
-```
-
-Build warehouse:
-
-```
-cd dbt
-dbt build
-```
-
----
-
-## 7. Bronze Layer
-
-Source | Purpose
----|---
-UN World Population Prospects 2024 | population backbone
-World Development Indicators | economic and social indicators
-
-### 7.1 Current Bronze Outputs
-
-Dataset | Location
----|---
-WPP2024 population | `data/raw/wpp2024`
-WDI placeholder | `data/raw/wdi/wdi_country_year_long.csv`
-*To add more from repo table*
-
-All future datasets attach to:
-
-```
-fact_country_year_spine
-```
-
-Purpose:
-
-* ensures consistent joins
-* guarantees analytical grain
-* prevents missing entity-year combinations
-
-All facts must join through the spine.
-
----
-
-## 8. Silver Layer Models
-
-### 8.1 Silver Facts
-
-| Model       | Source      |
-| --------------- | --------------- |
-| silver__fact_population_country_year | UN World Population Prospects |
-| silver__fact_health_country_year | UN World Population Prospects |
-| silver__fact_education_country_year | UN World Population Prospects |
-| silver__fact_inequality_country_year | UN World Population Prospects |
-| silver__fact_climate_risk_country_year | UN World Population Prospects |
-| silver__fact_conflict_country_year | UN World Population Prospects |
-| silver__fact_hdi_country_year | UN World Population Prospects |
-| silver__fact_hdi_country_year_annualized | UN World Population Prospects |
-
-### 8.2 Indicator Mapping
-
-Refer to the following documents for details:
-
-* World2045_Master_Indicator_Map
-* World2045_dbt_indicator_mapping
-
-### 8.3 Model Pattern for Indicator-to-Feature Transformation
-
-Refer to the following documents for details:
-
-* World2045_dbt_model_pattern.md
-
----
-
-## 9. Gold Layer
-
-### 9.1 Primary analytical mart confirmed operational
-
-`gold__mart_world2045_features_country_year`
-
-* Integrated country‑year analytical feature table
-
-### 9.2 Dense historical dataset for modelling
-
-`gold__mart_world2045_features_analytic_1960_2023`
-
-### 9.3 Diagnostic Models
-
-`gold__mart_profile_indicator_coverage_by_year`
-
-* Tracks indicator density over time
-
-`gold__mart_profile_indicator_coverage_by_country`
-
-* Tracks data completeness per country
-
-`gold__features_world2045_normalized_country_year`
-
-* Normalized Layer
-
-`gold__mart_world2045_model_dataset`
-
-* Model Dataset
-
-### 9.4 Unified analytical dataset combination
-
-```
-population
-economic indicators
-social indicators
-development trajectories
-inequality concentration
-governance dynamics
-climate vulnerability
-conflict exposure
-```
-
-Example columns:
-
-```
-population_total
-gdp_current_usd
-life_expectancy_years
-internet_users_pct
-vdem_liberal_democracy_index
-```
-
-Availability flags are generated for each major domain.
-
-Example:
-
-```
-population_available
-gdp_available
-governance_available
-```
-
-The final modeling panel contains:
-
-- 159 countries
-- 96 years (1950 - 2045)
-- 15,264 rows
-
----
-
-## 10. Ingestion Best Practices
-
-The following rules are applied for all ingestion pipelines.
-
-### 10.1 Inspect source files first
-
-Always inspect source ZIP contents before building ingestion scripts.
-
-### 10.2 Extract minimal columns
-
-Wide datasets should first be narrowed before loading.
-
-### 10.3 Avoid high memory loads
-
-Large files should be streamed or filtered before ingestion.
-
-### 10.4 Validate schema before dbt
-
-Bronze files must be verified before building silver models.
-
----
-
-## 11. dbt Testing Strategy
-
-Basic unit tests exist for:
-
-* path utilities
-* quality checks
-
-Run with:
-
-```
-pytest
-```
-
-### 11.1 Tests implemented
-
-**Column integrity**
-
-```
-not_null
-```
-
-**Referential integrity**
-
-```
-relationships
-```
-
-**Analytical grain**
-
-```
-dbt_utils.unique_combination_of_columns
-```
-
-**CI Pipeline**
-
-GitHub Actions runs dbt checks automatically via:
-
-```
-.github/workflows/dbt-ci.yml
-```
-
-Actions execute:
-
-```
-dbt deps
-dbt seed
-dbt build
-```
-
-This ensures all models compile and pass tests.
-
----
-
-## 12. Future Technical Enhancements
-
-Planned improvements:
-
-* partitioning and clustering for BigQuery tables
-* domain-specific marts
-* data quality monitoring
-* feature store for predictive modelling
-
----
+Portions of the technical design, debugging support, and documentation refinement for this project were assisted by **ChatGPT (OpenAI)**. All final implementation decisions, data engineering work, analytical modeling, and system integration were performed by the project author.
