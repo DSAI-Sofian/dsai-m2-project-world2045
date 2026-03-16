@@ -37,8 +37,8 @@ htmlcov/
 # =========================================================
 *.ipynb
 !.ipynb_checkpoints/
-!notebooks/
-!notebooks/*.ipynb
+!notebook/
+!notebook/*.ipynb
 !main/notebook/
 !main/notebook/*.ipynb
 
