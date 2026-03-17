@@ -80,6 +80,9 @@ MAIN
 │   ├ app/
 │   └ data/
 │
+├── notebook/
+│   └ WORLD2045_Training_Manual_Data_Analyst.ipynb
+│
 └ data/          (small extracts only)
 ```
 
