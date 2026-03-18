@@ -441,9 +441,8 @@ Below is the simplified structure of the repository (notebook section).
 
     dsai-m2-personal-assignment/
     │
-    ├─ main/
-    │   └─ notebook/
-    │       └─ WORLD2045_Training_Manual_Data_Analyst.ipynb
+    ├─ notebook/
+    │   └─ WORLD2045_Training_Manual_Data_Analyst.ipynb
     │
     ├─ data/
     │   └─ sample/
