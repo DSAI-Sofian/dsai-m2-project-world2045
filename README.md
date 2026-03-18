@@ -10,15 +10,9 @@
   - [Main datasets used](#main-datasets-used)
   - [Time coverage](#time-coverage)
   - [Forecast interpretation](#forecast-interpretation)
-  - [Main findings at a glance](#main-findings-at-a-glance)
   - [How to run the project](#how-to-run-the-project)
-    - [Environment setup](#environment-setup)
-    - [dbt setup](#dbt-setup)
-    - [Build models](#build-models)
-    - [Run tests](#run-tests)
-  - [Suggested usage flow](#suggested-usage-flow)
-  - [Live Dashboard](#live-dashboard)
-    - [Quick Start](#quick-start)
+- [Live Dashboard](#live-dashboard)
+  - [Quick Start](#quick-start)
   - [Intended audiences (external)](#intended-audiences-external)
   - [Intended audiences (coursework)](#intended-audiences-coursework)
 - [Running the Local Analysis Notebook](#running-the-local-analysis-notebook)
@@ -30,7 +24,7 @@
   - [Local Analytical Notebook Architecture](#local-analytical-notebook-architecture)
   - [Architecture overview](#architecture-overview)
   - [Step-by-step workflow](#step-by-step-workflow)
-  - [Project Structure](#project-structure)
+  - [Project Structure (notebook section)](#project-structure-notebook-section)
   - [Reproducibility](#reproducibility)
 - [Acknowledgements](#acknowledgements)
 
@@ -146,7 +140,7 @@ For variables without direct projections, the baseline scenario carries forward 
 
 This means forecast outputs should be read as **structured continuation paths**, not as full causal forecasts of politics, climate shocks, or war.
 
-## Main findings at a glance
+**Main findings at a glance**
 
 - Europe remains the strongest overall structural region by 2045.
 - Asia is the most heterogeneous region, with countries across all trajectory categories.
@@ -154,9 +148,11 @@ This means forecast outputs should be read as **structured continuation paths**,
 - Guyana emerges as the most prominent high-momentum outlier.
 - Global convergence appears limited; structural hierarchy persists into 2045.
 
+---
+
 ## How to run the project
 
-### Environment setup
+1. Environment setup
 
 ```bash
 python -m venv .venv
@@ -164,25 +160,25 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### dbt setup
+2. dbt setup
 
 ```bash
 dbt deps
 ```
 
-### Build models
+3. Build models
 
 ```bash
 dbt run
 ```
 
-### Run tests
+4. Run tests
 
 ```bash
 dbt test
 ```
 
-## Suggested usage flow
+**Suggested usage flow**
 
 1. Build bronze and silver layers.
 2. Build `gold__mart_world2045_features_country_year`.
@@ -192,13 +188,13 @@ dbt test
 6. Run validation SQL in the training manual.
 7. Use the dashboard-ready marts for visualization.
 
-## Live Dashboard
+# Live Dashboard
 
 Streamlit dashboard deployed on Hugging Face:
 
 https://sofian75-world2045-dashboard.hf.space
 
-### Quick Start
+## Quick Start
 
 1. Clone the repository:
 
@@ -448,9 +444,9 @@ Example:
 
 ------------------------------------------------------------------------
 
-## Project Structure
+## Project Structure (notebook section)
 
-Below is the simplified structure of the repository.
+Below is the simplified structure of the repository (notebook section).
 
     dsai-m2-personal-assignment/
     │

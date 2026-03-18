@@ -1,37 +1,22 @@
 # TECHNICAL README
 
-- [TECHNICAL\_README](#technical_readme)
+- [TECHNICAL README](#technical-readme)
   - [Technical purpose](#technical-purpose)
   - [Platform stack](#platform-stack)
   - [Repository design principles](#repository-design-principles)
   - [Warehouse design](#warehouse-design)
-    - [Bronze](#bronze)
-    - [Silver](#silver)
-    - [Gold](#gold)
   - [Country conformance](#country-conformance)
   - [Core analytical mart](#core-analytical-mart)
-    - [`gold__mart_world2045_features_country_year`](#gold__mart_world2045_features_country_year)
   - [Forecast feature mart](#forecast-feature-mart)
-    - [`gold__forecast_feature_country_year`](#gold__forecast_feature_country_year)
   - [Historical trajectory model](#historical-trajectory-model)
-    - [`gold__country_trajectory_score_year`](#gold__country_trajectory_score_year)
   - [Forecast trajectory scenario model](#forecast-trajectory-scenario-model)
-    - [`gold__country_trajectory_score_year_scenario`](#gold__country_trajectory_score_year_scenario)
   - [Regional aggregation models](#regional-aggregation-models)
-    - [`gold__region_trajectory_score_year`](#gold__region_trajectory_score_year)
-    - [`gold__subregion_trajectory_score_year`](#gold__subregion_trajectory_score_year)
   - [Strategic ranking models](#strategic-ranking-models)
-    - [`gold__country_rise_potential`](#gold__country_rise_potential)
-    - [`gold__country_trajectory_momentum`](#gold__country_trajectory_momentum)
-    - [`gold__trajectory_country_quadrant`](#gold__trajectory_country_quadrant)
   - [Dashboard-ready support marts](#dashboard-ready-support-marts)
   - [Important validation results locked in](#important-validation-results-locked-in)
   - [Indicator Dictionary](#indicator-dictionary)
-  - [Methodological Limitations and Future Work](#methodological-limitations-and-future-work)
-    - [Known limitations](#known-limitations)
-    - [Methodological Limitations](#methodological-limitations)
-    - [Future Work](#future-work)
-  - [Acknowledgements](#acknowledgements)
+- [Methodological Limitations and Future Work](#methodological-limitations-and-future-work)
+- [Acknowledgements](#acknowledgements)
 
 
 ## Technical purpose
@@ -58,7 +43,7 @@ The project was built incrementally with these standing rules:
 
 ## Warehouse design
 
-### Bronze
+**1. Bronze**
 Raw-landed or lightly standardized source tables.
 
 Representative examples:
@@ -67,7 +52,7 @@ Representative examples:
 - `bronze__wpp_*`
 - climate and conflict bronze source tables
 
-### Silver
+**2. Silver**
 Conformed country-year facts with normalized keys and consistent field naming.
 
 Representative examples:
@@ -76,7 +61,7 @@ Representative examples:
 - `silver__projection_gdp_country_year_annualized`
 - `silver__fact_*_country_year`
 
-### Gold
+**3. Gold**
 Wide feature marts and analytical scoring layers.
 
 Critical tables:
@@ -107,7 +92,7 @@ Important metadata fields in `country_overrides`:
 
 ## Core analytical mart
 
-### `gold__mart_world2045_features_country_year`
+- `gold__mart_world2045_features_country_year`
 
 This is the principal wide feature mart used for historical analysis.
 
@@ -122,7 +107,7 @@ Important fields used in trajectory work:
 
 ## Forecast feature mart
 
-### `gold__forecast_feature_country_year`
+- `gold__forecast_feature_country_year`
 
 Constructed from:
 
@@ -138,7 +123,7 @@ Important projected fields:
 
 ## Historical trajectory model
 
-### `gold__country_trajectory_score_year`
+- `gold__country_trajectory_score_year`
 
 Historical trajectory score for 1995-2023.
 
@@ -164,7 +149,7 @@ trajectory_score =
 
 ## Forecast trajectory scenario model
 
-### `gold__country_trajectory_score_year_scenario`
+- `gold__country_trajectory_score_year_scenario`
 
 This model appends 2024-2045 forecast years to the historical framework.
 
@@ -199,10 +184,10 @@ Coverage result locked in during validation:
 
 ## Regional aggregation models
 
-### `gold__region_trajectory_score_year`
+- `gold__region_trajectory_score_year`
 Region-level aggregation.
 
-### `gold__subregion_trajectory_score_year`
+- `gold__subregion_trajectory_score_year`
 Subregion-level aggregation.
 
 Important implementation note:
@@ -216,7 +201,7 @@ Recommended filters for interpretability:
 
 ## Strategic ranking models
 
-### `gold__country_rise_potential`
+- `gold__country_rise_potential`
 Measures strategic position by 2045.
 
 Formula:
@@ -229,7 +214,7 @@ rise_potential_score =
 - 0.05 * conflict_severity_norm_2023
 ```
 
-### `gold__country_trajectory_momentum`
+- `gold__country_trajectory_momentum`
 Measures relative movement / momentum.
 
 Formula:
@@ -242,7 +227,7 @@ momentum_score =
 - 0.03 * conflict_severity_norm_2023
 ```
 
-### `gold__trajectory_country_quadrant`
+- `gold__trajectory_country_quadrant`
 2x2 strategic segmentation combining 2045 score and momentum.
 
 Quadrants:
@@ -269,23 +254,23 @@ These support trend charts, component decomposition charts, and country-level an
 
 ## Indicator Dictionary
 
-| Indicator | Description | Source |
-|----------|-------------|--------|
-| population_total | Total population | UN Population Division |
-| gdp_per_capita_current_usd | GDP per capita in current USD | World Bank |
-| life_expectancy_years | Average life expectancy | World Bank |
-| internet_users_pct | Percentage of internet users | World Bank |
-| gini_income | Income inequality (Gini coefficient) | World Inequality Database |
-| vdem_liberal_democracy_index | Governance and democracy score | V‑Dem |
-| climate_vulnerability | Climate vulnerability index | ND‑GAIN |
-| adaptation_readiness | Climate adaptation readiness | ND‑GAIN |
-| battle_deaths | Conflict battle deaths | UCDP |
+| Indicator                    | Description                          | Source                    |
+| ---------------------------- | ------------------------------------ | ------------------------- |
+| population_total             | Total population                     | UN Population Division    |
+| gdp_per_capita_current_usd   | GDP per capita in current USD        | World Bank                |
+| life_expectancy_years        | Average life expectancy              | World Bank                |
+| internet_users_pct           | Percentage of internet users         | World Bank                |
+| gini_income                  | Income inequality (Gini coefficient) | World Inequality Database |
+| vdem_liberal_democracy_index | Governance and democracy score       | V‑Dem                     |
+| climate_vulnerability        | Climate vulnerability index          | ND‑GAIN                   |
+| adaptation_readiness         | Climate adaptation readiness         | ND‑GAIN                   |
+| battle_deaths                | Conflict battle deaths               | UCDP                      |
 
 ---
 
-## Methodological Limitations and Future Work
+# Methodological Limitations and Future Work
 
-### Known limitations
+**Known limitations**
 
 1. forward governance, climate, and conflict are baseline carry-forward rather than projected independently
 2. some countries and territories have incomplete historical component coverage
@@ -294,30 +279,30 @@ These support trend charts, component decomposition charts, and country-level an
 
 ---
 
-### Methodological Limitations
+**Methodological Limitations**
 
-**1. Data Coverage Variability**
+1. Data Coverage Variability
 Not all indicators have complete coverage across countries and time periods. Some indicators are unavailable for smaller states or earlier historical years. In such cases, the model relies on interpolation or carry‑forward methods to maintain continuity. This may introduce bias where structural changes occurred but were not captured by the available data.
 
-**2. Forecast Assumptions**
+2. Forecast Assumptions
 Forecast extensions from 2024–2045 rely on a combination of projected datasets and carry‑forward assumptions. Governance, climate vulnerability, and conflict indicators are often carried forward from the latest observed year due to limited forward projections. As a result, the forecast scenario represents a **baseline continuation scenario**, not a fully dynamic projection.
 
-**3. Indicator Weighting**
+3. Indicator Weighting
 The trajectory score uses weighted components representing economic, health, governance, climate, and conflict dimensions. While these weights are designed to balance structural development factors, they are ultimately subjective and may influence final rankings. Alternative weighting schemes could yield different outcomes.
 
-**4.Normalization Effects**
+4.Normalization Effects
 Indicator normalization ensures comparability across variables but can also create relative movement effects. Some countries may appear to decline slightly even if their underlying conditions improve, simply because other countries improve faster.
 
-**5. Structural Persistence**
+5. Structural Persistence
 Development trajectories often exhibit inertia. The model therefore captures gradual changes rather than abrupt structural shifts. Major geopolitical events, technological disruptions, or policy transformations could alter these trajectories significantly.
 
 ---
 
-### Future Work
+**Future Work**
 
 Several extensions could enhance the analytical capability of the World2045 platform.
 
-**1.Scenario Modeling**
+1.Scenario Modeling
 Future iterations could incorporate multiple development scenarios, such as:
 
 - optimistic economic growth pathways
@@ -325,16 +310,16 @@ Future iterations could incorporate multiple development scenarios, such as:
 - governance reform trajectories
 - conflict risk escalation scenarios
 
-**2. Machine Learning Forecasting**
+2. Machine Learning Forecasting
 Instead of carry‑forward assumptions, machine learning models could generate forward projections for governance, climate resilience, and conflict indicators.
 
-**3. Monte Carlo Simulation**
+3. Monte Carlo Simulation
 Uncertainty ranges could be incorporated using Monte Carlo simulations to produce confidence bands around trajectory scores.
 
-**4. Policy Sensitivity Analysis**
+4. Policy Sensitivity Analysis
 Future models could estimate how specific policy interventions influence development trajectories.
 
-**5. Expanded Indicator Coverage**
+5. Expanded Indicator Coverage
 Additional indicators could improve model robustness, including:
 
 - infrastructure quality
@@ -348,6 +333,6 @@ Additional indicators could improve model robustness, including:
 
 ---
 
-## Acknowledgements
+# Acknowledgements
 
 Portions of the technical design, debugging support, and documentation refinement for this project were assisted by **ChatGPT (OpenAI)**. All final implementation decisions, data engineering work, analytical modeling, and system integration were performed by the project author.
