@@ -18,9 +18,6 @@
 - [Running the Local Analysis Notebook](#running-the-local-analysis-notebook)
   - [Repository structure required](#repository-structure-required)
   - [Quick Start (3 Commands)](#quick-start-3-commands)
-    - [What happens in the setup cell](#what-happens-in-the-setup-cell)
-    - [Inspecting loaded tables](#inspecting-loaded-tables)
-    - [Dataset notes](#dataset-notes)
   - [Local Analytical Notebook Architecture](#local-analytical-notebook-architecture)
   - [Architecture overview](#architecture-overview)
   - [Step-by-step workflow](#step-by-step-workflow)
@@ -289,9 +286,7 @@ Open the notebook:
 
 Run the cells from top to bottom.
 
-------------------------------------------------------------------------
-
-### What happens in the setup cell
+**1. What happens in the setup cell**
 
 The notebook automatically:
 
@@ -306,9 +301,7 @@ con.execute("PRAGMA threads=4")
 con.execute("PRAGMA enable_progress_bar")
 ```
 
-------------------------------------------------------------------------
-
-### Inspecting loaded tables
+**2. Inspecting loaded table**
 
 The notebook includes helper functions for exploring the dataset.
 
@@ -334,9 +327,7 @@ LIMIT 10
 """)
 ```
 
-------------------------------------------------------------------------
-
-### Dataset notes
+**3. Dataset notes**
 
 The dataset included in `data/sample/` is a **curated subset** of the
 full World2045 warehouse.
