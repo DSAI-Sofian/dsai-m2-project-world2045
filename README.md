@@ -15,13 +15,12 @@
   - [Quick Start](#quick-start)
   - [Intended audiences (external)](#intended-audiences-external)
   - [Intended audiences (coursework)](#intended-audiences-coursework)
-- [Running the Local Analysis Notebook](#running-the-local-analysis-notebook)
+- [Running the Local Analysis Training Notebook](#running-the-local-analysis-training-notebook)
   - [Repository structure required](#repository-structure-required)
-  - [Quick Start (3 Commands)](#quick-start-3-commands)
-  - [Local Analytical Notebook Architecture](#local-analytical-notebook-architecture)
+  - [Quick Start - Analysis Training Notebook Set-up](#quick-start---analysis-training-notebook-set-up)
+  - [Local Training Notebook Architecture](#local-training-notebook-architecture)
   - [Architecture overview](#architecture-overview)
-  - [Step-by-step workflow](#step-by-step-workflow)
-  - [Project Structure (notebook section)](#project-structure-notebook-section)
+  - [Project Structure (Training notebook section)](#project-structure-training-notebook-section)
   - [Reproducibility](#reproducibility)
 - [Acknowledgements](#acknowledgements)
 
@@ -235,7 +234,7 @@ streamlit run dashboard/app/app.py
 
 ---
 
-# Running the Local Analysis Notebook
+# Running the Local Analysis Training Notebook
 
 This repository includes a **self-contained DuckDB notebook
 environment** that allows users to run the analytical SQL queries
@@ -260,7 +259,7 @@ these tables into DuckDB.
 
 ------------------------------------------------------------------------
 
-## Quick Start (3 Commands)
+## Quick Start - Analysis Training Notebook Set-up
 
 Clone the repository:
 
@@ -274,7 +273,7 @@ Create and activate a Python environment:
 
 Install required packages:
 
-    pip install duckdb pandas jupyter
+    pip install duckdb pandas pyarrow ipykernel matplotlib
 
 Launch Jupyter:
 
@@ -284,9 +283,9 @@ Open the notebook:
 
     main/notebook/WORLD2045_Training_Manual_Data_Analyst.ipynb
 
-Run the cells from top to bottom.
+Run the cells from top to bottom, starting with:
 
-**1. What happens in the setup cell**
+**1. Bootstrap**
 
 The notebook automatically:
 
@@ -294,40 +293,13 @@ The notebook automatically:
 2.  Loads all Parquet folders as DuckDB tables.
 3.  Enables optimized execution settings.
 
-Example configuration executed during setup:
-
-``` python
-con.execute("PRAGMA threads=4")
-con.execute("PRAGMA enable_progress_bar")
-```
-
-**2. Inspecting loaded table**
+**2. Perform data load checks**
 
 The notebook includes helper functions for exploring the dataset.
 
-List all tables:
-
-``` python
-show_tables()
-```
-
-Inspect schema:
-
-``` python
-describe_table("gold__country_rise_potential")
-```
-
-Run SQL queries:
-
-``` python
-run_query("""
-SELECT *
-FROM gold__country_rise_potential
-LIMIT 10
-""")
-```
-
-**3. Dataset notes**
+**4. Validate table browser**
+   
+**5. Dataset notes**
 
 The dataset included in `data/sample/` is a **curated subset** of the
 full World2045 warehouse.
@@ -346,7 +318,7 @@ BigQuery warehouse.
 
 ------------------------------------------------------------------------
 
-## Local Analytical Notebook Architecture
+## Local Training Notebook Architecture
 
 The analytical notebook is designed to run **entirely offline** using a
 curated subset of the project's analytical warehouse tables.
@@ -372,70 +344,7 @@ them into Parquet files that can be queried locally using DuckDB.
 
 ------------------------------------------------------------------------
 
-## Step-by-step workflow
-
-**1. BigQuery analytical warehouse**
-
-Primary analytical data is stored in **BigQuery gold marts** generated
-via dbt models.
-
-Examples:
-
-    gold__country_rise_potential
-    gold__country_trajectory_momentum
-    gold__region_trajectory_score_year
-    gold__subregion_trajectory_score_year
-
-**2. Curated dataset export**
-
-A filtered subset of the warehouse is exported using BigQuery
-`EXPORT DATA` statements.
-
-Example:
-
-    EXPORT DATA OPTIONS(
-      uri='gs://bucket/world2045_sample/<table>/*.parquet',
-      format='PARQUET'
-    )
-    AS SELECT * FROM world2045_ci.<table>;
-
-**3. Local Parquet dataset**
-
-Exported tables are stored locally:
-
-    data/sample/
-        <table_name>/
-            *.parquet
-
-**4. DuckDB local query engine**
-
-The notebook registers the Parquet files as DuckDB views so they can be
-queried using SQL.
-
-Example:
-
-    CREATE VIEW gold__country_rise_potential AS
-    SELECT * FROM read_parquet('data/sample/gold__country_rise_potential/*.parquet')
-
-**5. Jupyter analytical notebook**
-
-Queries are executed using the `run_query()` helper.
-
-Example:
-
-    run_query("""
-    SELECT
-        country_name,
-        trajectory_score_2023,
-        trajectory_score_2045
-    FROM gold__country_rise_potential
-    ORDER BY trajectory_score_2045 DESC
-    LIMIT 10
-    """)
-
-------------------------------------------------------------------------
-
-## Project Structure (notebook section)
+## Project Structure (Training notebook section)
 
 Below is the simplified structure of the repository (notebook section).
 
