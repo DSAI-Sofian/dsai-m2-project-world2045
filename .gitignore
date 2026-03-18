@@ -103,6 +103,7 @@ data/raw/wpp2024/*.xlsx
 *.ndjson
 *.sqlite
 *.duckdb
+*.duckdb.wal
 *.db
 *.zip
 *.gz

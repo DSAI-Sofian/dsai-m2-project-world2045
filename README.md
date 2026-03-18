@@ -271,9 +271,10 @@ Create and activate a Python environment:
     python -m venv .venv
     source .venv/bin/activate
 
-Install required packages:
+Install required packages and then register kernel:
 
-    pip install duckdb pandas pyarrow ipykernel matplotlib
+    pip install duckdb pandas==2.2.0 pyarrow matplotlib ipykernel
+    python -m ipykernel install --user --name world2045 --display-name "Python (world2045)"
 
 Launch Jupyter:
 
