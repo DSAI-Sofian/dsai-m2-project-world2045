@@ -2,7 +2,18 @@
 
 'World in 2045' is a country-year data engineering and analytics project that studies long-run development patterns from 1950 to 2045. It integrates population, economic, health, governance, climate, conflict, inequality, and human-development indicators into a unified BigQuery + dbt analytical platform.
 
+## Latest Update on 13 June 2026
+- Added a formal ML projection data contract.
+- Built and validated a structural-risk ML pipeline.
+- Integrated ML only for `climate_vulnerability` into a new scenario
+  `baseline_ml_dynamic_risk`.
+- Preserved existing `baseline_static_risk` behavior and parity.
+- Exposed both scenarios in the dashboard with comparison views.
+
+You may review the documentation for ML upgrades in `docs`.
+
 - [WORLD IN 2045](#world-in-2045)
+  - [Latest Update on 13 June 2026](#latest-update-on-13-june-2026)
   - [Project objective](#project-objective)
   - [Repository Structure](#repository-structure)
   - [Core analytical outputs](#core-analytical-outputs)
