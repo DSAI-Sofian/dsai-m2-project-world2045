@@ -87,6 +87,74 @@ models:
 
       - name: model_name
         description: "Projection model retained from the SSP GDP source."
+
+  - name: silver__projection_structural_risk_country_year
+    description: >
+      Sprint 1 placeholder ML projection contract for structural-risk indicators.
+      This model defines the target country-year-indicator schema for future ML outputs
+      without changing current scenario scoring behavior.
+    columns:
+      - name: country_iso3
+        tests:
+          - not_null
+
+      - name: year
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 2024
+                max_value: 2045
+                inclusive: true
+
+      - name: scenario_id
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['baseline_static_risk']
+
+      - name: indicator_name
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - vdem_liberal_democracy_index
+                  - adaptation_readiness
+                  - climate_vulnerability
+                  - conflict_severity
+
+      - name: projected_value
+        description: "Placeholder projected value; intentionally null in Sprint 1."
+
+      - name: projection_source
+        tests:
+          - not_null
+
+      - name: forecast_method
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['ml_placeholder']
+
+      - name: model_version
+        tests:
+          - not_null
+
+      - name: created_at
+        tests:
+          - not_null
+
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - country_iso3
+              - year
+              - scenario_id
+              - indicator_name
 #
 #  - name: silver__projection_climate_country_year
 #    description: Country-year climate scenario features normalized into a conformed projection schema.

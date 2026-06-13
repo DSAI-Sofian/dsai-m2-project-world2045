@@ -97,3 +97,21 @@
 - prepared technical README
 - prepared training manual with validation SQL
 - prepared final analytical findings with validation SQL aligned to each conclusion
+
+## Phase 11 - ML Upgrade Sprint 1 (Contract and Baseline Parity)
+
+- added placeholder structural-risk projection contract model:
+  - `silver__projection_structural_risk_country_year`
+- defined contract fields for future ML forecast integration:
+  - `country_iso3`, `year`, `scenario_id`, `indicator_name`, `projected_value`
+  - `projection_source`, `forecast_method`, `model_version`, `created_at`
+- added schema tests for contract integrity:
+  - not null keys and metadata fields
+  - unique contract grain
+  - forecast year range (2024-2045)
+  - accepted values for scenario, indicator, and forecast method
+- preserved existing baseline scenario behavior:
+  - no change to `gold__country_trajectory_score_year_scenario`
+  - carry-forward assumptions remain authoritative for `baseline_static_risk`
+- added Sprint 1 contract documentation:
+  - `docs/ml_forecasting_contract.md`
