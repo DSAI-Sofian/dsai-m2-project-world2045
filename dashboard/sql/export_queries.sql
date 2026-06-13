@@ -5,7 +5,9 @@
 -- 1) Global yearly trend
 SELECT
   year,
-  global_trajectory_score AS trajectory_score
+  global_trajectory_score AS trajectory_score,
+  scenario_id,
+  is_forecast_year
 FROM `{{ project }}.{{ dataset }}.gold__trajectory_global_year`
 ORDER BY year;
 
@@ -13,7 +15,9 @@ ORDER BY year;
 SELECT
   region_name,
   year,
-  avg_trajectory_score AS trajectory_score
+  avg_trajectory_score AS trajectory_score,
+  scenario_id,
+  is_forecast_year
 FROM `{{ project }}.{{ dataset }}.gold__region_trajectory_score_year`
 ORDER BY region_name, year;
 
@@ -25,15 +29,17 @@ SELECT
   year,
   scenario_id,
   trajectory_score,
-  trajectory_score_2045,
-  momentum_score,
-  rise_potential_score,
-  quadrant,
-  forecast_completeness,
-  is_rankable_forecast_case,
-  is_sovereign
+  is_forecast_year,
+  forecast_score_completeness,
+  assumption_flag,
+  region,
+  subregion,
+  income_group,
+  is_sovereign,
+  climate_vulnerability_projection_source,
+  climate_vulnerability_forecast_method
 FROM `{{ project }}.{{ dataset }}.gold__country_trajectory_score_year_scenario`
-WHERE scenario_id = 'baseline_static_risk'
+WHERE scenario_id IN ('historical_observed', 'baseline_static_risk', 'baseline_ml_dynamic_risk')
 ORDER BY country_name, year;
 
 -- 4) Country component breakdown
@@ -83,3 +89,32 @@ ORDER BY rise_potential_score DESC;
 --   seconds_to_midnight FLOAT64,
 --   risk_factor STRING,
 --   risk_score FLOAT64
+
+-- 8) Scenario delta summary (optional but recommended for Sprint 4 comparison section)
+SELECT
+  scope_type,
+  scope_name,
+  country_count,
+  avg_score_delta,
+  min_score_delta,
+  max_score_delta,
+  avg_rank_delta
+FROM `{{ project }}.{{ dataset }}.gold__scenario_delta_summary`
+ORDER BY scope_type, scope_name;
+
+-- 9) Scenario delta country 2045 (optional but recommended for Sprint 4 comparison section)
+SELECT
+  country_iso3,
+  country_name,
+  region,
+  subregion,
+  income_group,
+  is_sovereign,
+  trajectory_score_static_2045,
+  trajectory_score_ml_2045,
+  trajectory_score_delta_ml_minus_static,
+  trajectory_rank_static_2045,
+  trajectory_rank_ml_2045,
+  trajectory_rank_delta_static_minus_ml
+FROM `{{ project }}.{{ dataset }}.gold__scenario_delta_country_2045`
+ORDER BY ABS(trajectory_score_delta_ml_minus_static) DESC, country_iso3;

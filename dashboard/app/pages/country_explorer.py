@@ -1,8 +1,15 @@
 from __future__ import annotations
 
+import pandas as pd
 import streamlit as st
 
-from lib.loaders import get_country_list, load_all
+from lib.loaders import (
+    combine_historical_with_forecast,
+    get_country_list,
+    get_scenario_label,
+    load_all,
+    render_forecast_scenario_selector,
+)
 from lib.charts import bar_chart, line_chart
 from lib.ui import metric_row, page_header, show_empty_data_warning
 
@@ -28,7 +35,13 @@ def main():
         st.error(f"country_scores is missing required columns: {', '.join(missing)}")
         return
 
-    countries = get_country_list(scores)
+    scenario_id = render_forecast_scenario_selector(scores, key="country_explorer_scenario")
+    st.caption(get_scenario_label(scenario_id))
+
+    scores_display = combine_historical_with_forecast(scores, scenario_id)
+    components_display = combine_historical_with_forecast(components, scenario_id)
+
+    countries = get_country_list(scores_display)
     if not countries:
         st.warning("No countries available in the country dataset.")
         return
@@ -36,7 +49,7 @@ def main():
     default_country = "Singapore" if "Singapore" in countries else countries[0]
     country = st.selectbox("Select country", countries, index=countries.index(default_country))
 
-    score_df = scores[scores["country_name"] == country].copy()
+    score_df = scores_display[scores_display["country_name"] == country].copy()
     if score_df.empty:
         st.warning(f"No score rows available for {country}.")
         return
@@ -45,13 +58,13 @@ def main():
     country_iso3 = score_df["country_iso3"].dropna().iloc[0]
 
     comp_df = (
-        components[components["country_name"] == country].copy()
-        if not components.empty and "country_name" in components.columns
-        else components
+        components_display[components_display["country_name"] == country].copy()
+        if not components_display.empty and "country_name" in components_display.columns
+        else components_display
     )
 
     ranking_row = None
-    if not rankings.empty and "country_iso3" in rankings.columns:
+    if not rankings.empty and {"country_iso3", "country_name"}.issubset(rankings.columns):
         ranking_match = rankings[rankings["country_iso3"] == country_iso3].copy()
         if not ranking_match.empty:
             ranking_row = ranking_match.iloc[0]
@@ -111,14 +124,19 @@ def main():
                 summary["quadrant"] = ranking_row["quadrant"]
 
         if summary:
-            st.dataframe(
-                (
-                    st.session_state.get("_country_summary_df")
-                    if False
-                    else __import__("pandas").DataFrame.from_dict(summary, orient="index", columns=["value"])
-                ),
-                width="stretch",
-            )
+            st.dataframe(pd.DataFrame.from_dict(summary, orient="index", columns=["value"]), width="stretch")
+
+        if score_2045_df.empty:
+            st.info("2045 row is unavailable for this scenario in the current extract.")
+        else:
+            metadata_cols = [
+                "climate_vulnerability_projection_source",
+                "climate_vulnerability_forecast_method",
+            ]
+            available_metadata = [col for col in metadata_cols if col in score_2045_df.columns]
+            if available_metadata:
+                st.markdown("**Climate projection metadata (2045)**")
+                st.dataframe(score_2045_df[available_metadata].head(1), width="stretch")
 
     if not comp_df.empty and {"component", "value"}.issubset(comp_df.columns):
         latest_component_year = int(comp_df["year"].max())

@@ -17,7 +17,10 @@ def main():
         - Base data pipeline: Bronze → Silver → Gold on BigQuery and dbt.
         - Core visual layer should read precomputed extracts from gold models only.
         - Forecast rankings should be restricted to `is_rankable_forecast_case = true` and `is_sovereign = true`.
-        - Scenario logic currently uses projected GDP per capita and life expectancy, while governance, climate, adaptation, and conflict are carried forward from recent observed data.
+        - Scenario options for forecast years:
+          - `baseline_static_risk`: governance, climate, adaptation, and conflict are carried forward.
+          - `baseline_ml_dynamic_risk`: climate vulnerability uses validated ML projection where available, with explicit carry-forward fallback.
+        - Governance, adaptation, and conflict remain carry-forward in both forecast scenarios for this release.
         """
     )
 
@@ -39,7 +42,8 @@ def main():
     st.markdown(
         """
         - Forecast completeness varies by country.
-        - Several structural risk dimensions are held constant beyond the observed window.
+        - Climate ML coverage can be partial; fallback rows still use carry-forward assumptions.
+        - Several structural risk dimensions remain held constant beyond the observed window.
         - The Doomsday Clock module is symbolic and not an official Bulletin estimate.
         - The app is an academic decision-support artifact, not a production forecasting system.
         """

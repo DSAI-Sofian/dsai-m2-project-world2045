@@ -2,7 +2,13 @@ from __future__ import annotations
 
 import streamlit as st
 
-from lib.loaders import get_region_list, load_all
+from lib.loaders import (
+    combine_historical_with_forecast,
+    get_region_list,
+    get_scenario_label,
+    load_all,
+    render_forecast_scenario_selector,
+)
 from lib.charts import bar_chart, line_chart
 from lib.ui import page_header, show_empty_data_warning
 
@@ -24,14 +30,19 @@ def main():
         st.error("region_year is missing required column: region_name")
         return
 
-    regions = get_region_list(region_year)
+    scenario_id = render_forecast_scenario_selector(region_year, key="regional_view_scenario")
+    st.caption(get_scenario_label(scenario_id))
+
+    region_year_display = combine_historical_with_forecast(region_year, scenario_id)
+
+    regions = get_region_list(region_year_display)
     if not regions:
         st.warning("No regions available in the regional dataset.")
         return
 
     region = st.selectbox("Select region", regions)
 
-    region_df = region_year[region_year["region_name"] == region].copy()
+    region_df = region_year_display[region_year_display["region_name"] == region].copy()
     st.plotly_chart(
         line_chart(
             region_df,

@@ -200,3 +200,25 @@
   - `gold__scenario_delta_country_2045`
   - `gold__scenario_delta_summary`
 - no dashboard changes
+
+## Phase 15 - ML Upgrade Sprint 4 (Dashboard Scenario Exposure)
+
+- added forecast scenario selector to dashboard forecast views with default:
+  - `baseline_static_risk`
+  - optional `baseline_ml_dynamic_risk` when available in exported data
+- added clear scenario-explanation labels for static vs ML dynamic risk assumptions
+- updated dashboard filtering to combine:
+  - `historical_observed` rows
+  - selected forecast scenario rows
+- surfaced climate projection metadata in country view when columns are exported:
+  - `climate_vulnerability_projection_source`
+  - `climate_vulnerability_forecast_method`
+- added scenario comparison section in global overview using optional exports:
+  - `scenario_delta_summary`
+  - `scenario_delta_country_2045`
+- added graceful fallback behavior when comparison files are missing
+- updated dashboard export SQL guidance to include:
+  - both forecast scenarios in country-score exports
+  - optional scenario-delta exports
+- documented Sprint 4 delivery in:
+  - `docs/ml_forecasting_sprint_4.md`
