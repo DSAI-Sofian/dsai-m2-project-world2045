@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import argparse
 import subprocess
+import sys
+from shutil import which
 from pathlib import Path
 
 
@@ -22,7 +24,22 @@ def run_dbt_build(
     if not dbt_project_dir.exists():
         raise FileNotFoundError(f"dbt project directory not found: {dbt_project_dir}")
 
-    command = ["dbt", "build"]
+    dbt_executable = which("dbt")
+    if dbt_executable is None:
+        candidates = [
+            Path(sys.executable).resolve().parent / "dbt",
+            Path(__file__).resolve().parents[1] / ".venv" / "bin" / "dbt",
+            Path.cwd() / ".venv" / "bin" / "dbt",
+        ]
+        found = next((c for c in candidates if c.exists()), None)
+        if found is not None:
+            dbt_executable = str(found)
+        else:
+            raise FileNotFoundError(
+                "dbt executable not found in PATH or known virtual environment locations."
+            )
+
+    command = [dbt_executable, "build"]
 
     if select:
         command.extend(["--select", *select])

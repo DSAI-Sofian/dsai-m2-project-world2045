@@ -56,7 +56,10 @@ historical_base as (
         h.vdem_liberal_democracy_index,
         h.adaptation_readiness,
         h.climate_vulnerability,
-        hc.conflict_severity
+        hc.conflict_severity,
+
+        'observed_historical' as climate_vulnerability_projection_source,
+        'observed_historical' as climate_vulnerability_forecast_method
     from historical_features h
     left join historical_conflict hc
       on h.country_iso3 = hc.country_iso3
@@ -78,7 +81,22 @@ latest_observed_state as (
 
 ),
 
-forecast_base as (
+ml_climate_projection as (
+
+    select
+        country_iso3,
+        year,
+        projected_value as climate_vulnerability_ml,
+        projection_source as climate_vulnerability_projection_source,
+        forecast_method as climate_vulnerability_forecast_method
+    from {{ ref('silver__projection_structural_risk_country_year') }}
+    where scenario_id = 'baseline_ml_dynamic_risk'
+      and indicator_name = 'climate_vulnerability'
+      and year between 2024 and 2045
+
+),
+
+forecast_base_static as (
 
     select
         f.country_iso3,
@@ -91,10 +109,39 @@ forecast_base as (
         los.vdem_liberal_democracy_index,
         los.adaptation_readiness,
         los.climate_vulnerability,
-        los.conflict_severity
+        los.conflict_severity,
+
+        'carry_forward_latest_observed' as climate_vulnerability_projection_source,
+        'carry_forward_baseline' as climate_vulnerability_forecast_method
     from forecast_features f
     left join latest_observed_state los
       on f.country_iso3 = los.country_iso3
+
+),
+
+forecast_base_ml as (
+
+    select
+        f.country_iso3,
+        f.year,
+        'baseline_ml_dynamic_risk' as scenario_id,
+        true as is_forecast_year,
+
+        f.gdp_per_capita_current_usd,
+        f.life_expectancy_years,
+        los.vdem_liberal_democracy_index,
+        los.adaptation_readiness,
+        coalesce(ml.climate_vulnerability_ml, los.climate_vulnerability) as climate_vulnerability,
+        los.conflict_severity,
+
+        coalesce(ml.climate_vulnerability_projection_source, 'carry_forward_latest_observed') as climate_vulnerability_projection_source,
+        coalesce(ml.climate_vulnerability_forecast_method, 'carry_forward_baseline') as climate_vulnerability_forecast_method
+    from forecast_features f
+    left join latest_observed_state los
+      on f.country_iso3 = los.country_iso3
+    left join ml_climate_projection ml
+      on f.country_iso3 = ml.country_iso3
+     and f.year = ml.year
 
 ),
 
@@ -102,13 +149,16 @@ combined as (
 
     select * from historical_base
     union all
-    select * from forecast_base
+    select * from forecast_base_static
+    union all
+    select * from forecast_base_ml
 
 ),
 
 year_bounds as (
 
     select
+        scenario_id,
         year,
 
         min(gdp_per_capita_current_usd) as min_gdp_per_capita_current_usd,
@@ -129,7 +179,7 @@ year_bounds as (
         min(conflict_severity) as min_conflict_severity,
         max(conflict_severity) as max_conflict_severity
     from combined
-    group by year
+    group by scenario_id, year
 
 ),
 
@@ -147,6 +197,8 @@ normalized as (
         c.adaptation_readiness,
         c.climate_vulnerability,
         c.conflict_severity,
+        c.climate_vulnerability_projection_source,
+        c.climate_vulnerability_forecast_method,
 
         case
             when yb.max_gdp_per_capita_current_usd = yb.min_gdp_per_capita_current_usd then null
@@ -186,6 +238,7 @@ normalized as (
     from combined c
     left join year_bounds yb
       on c.year = yb.year
+     and c.scenario_id = yb.scenario_id
 
 ),
 
@@ -203,6 +256,8 @@ scored as (
         adaptation_readiness,
         climate_vulnerability,
         conflict_severity,
+        climate_vulnerability_projection_source,
+        climate_vulnerability_forecast_method,
 
         gdp_pc_norm,
         life_expectancy_norm,
@@ -226,7 +281,8 @@ scored as (
        -0.10 * coalesce(conflict_severity_norm, 0) as contribution_conflict,
 
         case
-            when is_forecast_year then 'Forward score uses projected GDP per capita and life expectancy, with governance, climate vulnerability, adaptation readiness, and conflict risk carried forward from the latest observed year.'
+            when scenario_id = 'baseline_static_risk' then 'Forward score uses projected GDP per capita and life expectancy, with governance, climate vulnerability, adaptation readiness, and conflict risk carried forward from the latest observed year.'
+            when scenario_id = 'baseline_ml_dynamic_risk' then 'Forward score uses projected GDP per capita and life expectancy, with climate vulnerability from ML projection (fallback to carry-forward), while governance, adaptation readiness, and conflict risk remain carry-forward from the latest observed year.'
             else 'Observed-year score based on historical indicator values.'
         end as assumption_flag,
 

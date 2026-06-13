@@ -1,6 +1,8 @@
 # Core data processing
 pandas>=2.2
 numpy>=1.26
+pyarrow>=24.0
+scikit-learn>=1.6
 
 # Excel ingestion
 openpyxl>=3.1

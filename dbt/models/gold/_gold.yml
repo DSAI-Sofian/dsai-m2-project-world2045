@@ -551,3 +551,17 @@ models:
               - country_iso3
               - year
               - scenario_id
+
+  - name: gold__scenario_delta_country_2045
+    description: >
+      Country-level comparison between baseline static and ML dynamic scenarios
+      at year 2045, including score and rank deltas.
+    columns:
+      - name: country_iso3
+        tests:
+          - not_null
+
+  - name: gold__scenario_delta_summary
+    description: >
+      Summary-level delta report (global and by region) comparing baseline
+      static and ML dynamic scenarios at year 2045.

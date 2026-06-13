@@ -115,3 +115,88 @@
   - carry-forward assumptions remain authoritative for `baseline_static_risk`
 - added Sprint 1 contract documentation:
   - `docs/ml_forecasting_contract.md`
+
+## Phase 12 - ML Upgrade Sprint 2 (Governance and Climate Forecasting)
+
+- added ML-ready panel model for structural-risk indicators:
+  - `silver__ml_structural_risk_panel_country_year`
+- engineered panel features:
+  - previous-year value
+  - 3-year and 5-year rolling means
+  - 3-year and 5-year changes
+  - missingness flags
+- added Sprint 2 training and forecasting script:
+  - `scripts/train_structural_ml_forecasts.py`
+- implemented model benchmark workflow:
+  - carry-forward baseline
+  - linear and ridge regression (numpy fallback)
+  - random forest when scikit-learn is available
+- generated Sprint 1 contract-shaped forecast artifact for:
+  - years 2024-2045
+  - scenario `baseline_ml_dynamic_risk`
+- generated Sprint 2 validation artifacts:
+  - backtest metrics for 2010-2023
+  - indicator-level ML vs carry-forward comparison
+  - forecast coverage by indicator
+- added Sprint 2 documentation:
+  - `docs/ml_forecasting_sprint_2.md`
+- preserved baseline behavior:
+  - no integration into gold scenario scoring model yet
+  - no dashboard changes
+
+## Phase 13 - ML Upgrade Sprint 2B (Validation Hardening)
+
+- installed and validated ML runtime dependencies for local experimentation:
+  - `scikit-learn`
+  - `pyarrow`
+  - compatible `pandas` and `numpy`
+- upgraded training pipeline with rolling-origin evaluation folds:
+  - train to 2005, test 2006-2010
+  - train to 2010, test 2011-2015
+  - train to 2015, test 2016-2020
+  - train to 2020, test 2021-2023
+- evaluated model set per indicator:
+  - carry-forward baseline
+  - linear regression
+  - ridge regression
+  - random forest regression
+- added regional validation outputs:
+  - MAE by indicator/model/region
+  - report of regions where ML is worse than carry-forward
+- added forecast sanity controls:
+  - valid value bounds
+  - year-to-year jump thresholds
+  - null-projection prevention via fallback
+  - carry-forward fallback for weak or unstable ML selections
+- executed dbt validation builds for Sprint 2 silver models:
+  - `silver__ml_structural_risk_panel_country_year`
+  - `silver__projection_structural_risk_country_year`
+- preserved integration boundaries:
+  - no gold scoring integration yet
+  - no dashboard integration yet
+
+## Phase 14 - ML Upgrade Sprint 3 (Climate-Only Scenario Integration)
+
+- integrated validated climate ML forecast into gold scenario scoring model:
+  - added new scenario `baseline_ml_dynamic_risk`
+  - climate uses `coalesce(ml_projection, carry_forward)` fallback logic
+- preserved `baseline_static_risk` scenario behavior unchanged
+- preserved carry-forward for non-integrated indicators:
+  - `vdem_liberal_democracy_index`
+  - `adaptation_readiness`
+  - `conflict_severity`
+- added climate projection metadata fields to scenario output:
+  - `climate_vulnerability_projection_source`
+  - `climate_vulnerability_forecast_method`
+- added projection seed for validated Sprint 2B climate outputs:
+  - `ml_climate_vulnerability_projection_2024_2045`
+- updated structural-risk projection model to include:
+  - static placeholder contract rows
+  - ML dynamic climate projection rows
+- added scenario validation tests:
+  - accepted forecast scenario ids
+  - static vs ML country-year forecast coverage parity
+- added comparison outputs for impact analysis:
+  - `gold__scenario_delta_country_2045`
+  - `gold__scenario_delta_summary`
+- no dashboard changes

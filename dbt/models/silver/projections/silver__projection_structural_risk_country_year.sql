@@ -30,7 +30,7 @@ indicators as (
 
 ),
 
-contract_rows as (
+static_placeholder as (
 
     select
         c.country_iso3,
@@ -46,7 +46,39 @@ contract_rows as (
     cross join forecast_years y
     cross join indicators i
 
+),
+
+ml_climate_projection as (
+
+    select
+        upper(trim(country_iso3)) as country_iso3,
+        cast(year as int64) as year,
+        cast(scenario_id as string) as scenario_id,
+        cast(indicator_name as string) as indicator_name,
+        cast(projected_value as float64) as projected_value,
+        cast(projection_source as string) as projection_source,
+        cast(forecast_method as string) as forecast_method,
+        cast(model_version as string) as model_version,
+        current_timestamp() as created_at
+    from {{ ref('ml_climate_vulnerability_projection_2024_2045') }}
+    where scenario_id = 'baseline_ml_dynamic_risk'
+      and indicator_name = 'climate_vulnerability'
+      and year between 2024 and 2045
+      and projected_value is not null
+
+),
+
+final as (
+
+    select *
+    from static_placeholder
+
+    union all
+
+    select *
+    from ml_climate_projection
+
 )
 
 select *
-from contract_rows
+from final
