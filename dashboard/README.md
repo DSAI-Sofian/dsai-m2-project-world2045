@@ -32,6 +32,8 @@ Place small precomputed files in `/data` (CSV or parquet):
 - `doomsday_clock.csv`
 - `scenario_delta_summary.parquet` (optional, for Sprint 4 comparison view)
 - `scenario_delta_country_2045.parquet` (optional, for Sprint 4 comparison view)
+- `model_evidence_metrics_summary.csv` (optional, Sprint 5A model evidence table)
+- `model_selection_decision.csv` (optional, Sprint 5A final decision table)
 
 Forecast scenario behavior in dashboard:
 
@@ -72,3 +74,10 @@ Repeat for the other export queries in `dashboard/sql/export_queries.sql`.
 - `avg_score_delta` and country-level score/rank deltas are computed as:
   - ML dynamic risk minus static baseline.
 - Treat this as comparative sensitivity analysis, not definitive forecast truth.
+
+## How to interpret accuracy context
+
+- In `Methodology`, MAE is displayed to compare models.
+- MAE is the average forecast miss size; lower is better.
+- The app shows model comparison and final indicator decisions when the
+  optional model evidence files are present.

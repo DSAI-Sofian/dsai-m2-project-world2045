@@ -1,0 +1,13 @@
+indicator_name,model_name,mae,mae_delta_vs_carry_forward,beats_carry_forward,eval_folds,eval_years,lower_mae_is_better
+adaptation_readiness,carry_forward_baseline,0.021411,0.0,False,4,18,True
+adaptation_readiness,linear_regression_sklearn,0.021305,-0.000106,True,4,18,True
+adaptation_readiness,ridge_regression_sklearn,0.022111,0.0007,False,4,18,True
+adaptation_readiness,random_forest_sklearn,0.02224,0.000829,False,4,18,True
+climate_vulnerability,carry_forward_baseline,0.005579,0.0,False,4,18,True
+climate_vulnerability,linear_regression_sklearn,0.005132,-0.000447,True,4,18,True
+climate_vulnerability,ridge_regression_sklearn,0.005672,9.3e-05,False,4,18,True
+climate_vulnerability,random_forest_sklearn,0.005499,-7.9e-05,True,4,18,True
+vdem_liberal_democracy_index,carry_forward_baseline,0.027978,0.0,False,4,18,True
+vdem_liberal_democracy_index,linear_regression_sklearn,0.030433,0.002454,False,4,18,True
+vdem_liberal_democracy_index,ridge_regression_sklearn,0.031474,0.003495,False,4,18,True
+vdem_liberal_democracy_index,random_forest_sklearn,0.032156,0.004178,False,4,18,True

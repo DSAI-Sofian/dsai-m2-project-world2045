@@ -266,3 +266,23 @@
   - governance/adaptation remain carry-forward
   - conflict remains deferred
   - ML scenario is comparative, not definitive
+
+## Phase 18 - ML Upgrade Sprint 5A (Non-Technical Evidence and Interpretation)
+
+- added non-technical ML evidence narrative:
+  - `docs/world2045_ml_evidence_for_nontechnical_reviewers.md`
+- added plain-language static vs ML comparison explainer:
+  - `docs/world2045_static_vs_ml_results_explained.md`
+- updated model governance docs with clearer non-technical framing:
+  - `docs/ml_model_card_climate_vulnerability.md`
+  - `docs/ml_forecasting_methodology.md`
+- added dashboard-visible model evidence support:
+  - optional `model_evidence_metrics_summary` dataset
+  - optional `model_selection_decision` dataset
+- updated dashboard methodology/global comparison explanations for:
+  - MAE interpretation (lower is better)
+  - model-selection rationale
+  - why only climate is integrated
+  - why governance/adaptation/conflict are not integrated
+  - delta sign interpretation and rank-vs-score movement context
+- clarified that the ML approach is classical tabular ML (no foundation-model fine-tuning)

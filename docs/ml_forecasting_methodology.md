@@ -5,6 +5,15 @@
 This document defines the forecasting approach used in the ML upgrade and the
 current production integration boundary.
 
+## Plain-Language Summary
+
+- We tested multiple classical ML models against the existing carry-forward
+  approach.
+- We chose the model per indicator based on out-of-sample validation quality.
+- We integrated only the indicator with sufficiently stable evidence
+  (`climate_vulnerability`).
+- This is not LLM fine-tuning; it is structured tabular forecasting.
+
 ## Indicator Coverage and Decisions
 
 - `climate_vulnerability`: integrated into `baseline_ml_dynamic_risk`
@@ -47,6 +56,11 @@ current production integration boundary.
   - null prevention
   - fallback when unstable/weaker
 
+MAE interpretation:
+
+- MAE = average forecast miss size
+- lower MAE is better
+
 ## 4) Output contract
 
 Forecast records use the structural-risk projection contract:
@@ -76,6 +90,10 @@ This preserves continuity while enabling comparative ML analysis.
 - Treat ML scenario as comparative, not definitive.
 - Always compare against static baseline before drawing conclusions.
 - Use delta outputs (`gold__scenario_delta_*`) to identify meaningful changes.
+- In dashboard deltas:
+  - positive score delta means ML dynamic risk is higher than static baseline
+  - negative score delta means ML dynamic risk is lower than static baseline
+  - rank shifts may be larger than score shifts when countries are tightly clustered
 
 ## Future Methodology Enhancements
 

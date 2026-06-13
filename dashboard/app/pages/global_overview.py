@@ -88,6 +88,11 @@ def main():
             "`scenario_delta_summary` and `scenario_delta_country_2045` to view deltas."
         )
     else:
+        st.caption(
+            "Interpretation guide: positive score delta means the ML dynamic scenario scores "
+            "higher than the static baseline; negative means lower. Rank movement can look "
+            "larger than score movement when many countries are clustered close together."
+        )
         if not scenario_delta_summary.empty:
             summary_view = scenario_delta_summary.copy()
             if "scope_name" in summary_view.columns:

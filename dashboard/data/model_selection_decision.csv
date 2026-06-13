@@ -1,0 +1,4 @@
+indicator_name,selected_model,best_ml_model,decision,reason,baseline_mae,best_ml_mae,mae_improvement,relative_improvement,fold_win_rate
+adaptation_readiness,carry_forward_baseline,linear_regression_sklearn,defer,ML improvement is too small,0.021411,0.021305,0.000106,0.004966,0.75
+climate_vulnerability,linear_regression_sklearn,linear_regression_sklearn,integrate,ML beats carry-forward with stable rolling-origin performance,0.005579,0.005132,0.000447,0.080134,0.75
+vdem_liberal_democracy_index,carry_forward_baseline,linear_regression_sklearn,keep carry-forward,best ML does not beat carry-forward,0.027978,0.030433,-0.002454,-0.087725,0.0

@@ -39,6 +39,14 @@ EXPECTED_FILES = {
         "scenario_delta_summary.parquet",
         "scenario_delta_summary.csv",
     ],
+    "model_evidence_metrics_summary": [
+        "model_evidence_metrics_summary.parquet",
+        "model_evidence_metrics_summary.csv",
+    ],
+    "model_selection_decision": [
+        "model_selection_decision.parquet",
+        "model_selection_decision.csv",
+    ],
 }
 
 
