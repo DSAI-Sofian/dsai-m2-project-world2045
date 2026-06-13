@@ -5,56 +5,69 @@
 -- 1) Global yearly trend
 SELECT
   year,
-  global_trajectory_score AS trajectory_score,
+  avg_trajectory_score AS trajectory_score,
+  country_count,
   scenario_id,
   is_forecast_year
 FROM `{{ project }}.{{ dataset }}.gold__trajectory_global_year`
-ORDER BY year;
+ORDER BY year, scenario_id;
 
 -- 2) Regional yearly trend
 SELECT
-  region_name,
+  region AS region_name,
   year,
   avg_trajectory_score AS trajectory_score,
+  country_count,
   scenario_id,
   is_forecast_year
 FROM `{{ project }}.{{ dataset }}.gold__region_trajectory_score_year`
-ORDER BY region_name, year;
+ORDER BY region_name, year, scenario_id;
 
 -- 3) Country scenario score path
 SELECT
-  country_iso3,
-  country_name,
-  region_name,
-  year,
-  scenario_id,
-  trajectory_score,
-  is_forecast_year,
-  forecast_score_completeness,
-  assumption_flag,
-  region,
-  subregion,
-  income_group,
-  is_sovereign,
-  climate_vulnerability_projection_source,
-  climate_vulnerability_forecast_method
-FROM `{{ project }}.{{ dataset }}.gold__country_trajectory_score_year_scenario`
-WHERE scenario_id IN ('historical_observed', 'baseline_static_risk', 'baseline_ml_dynamic_risk')
-ORDER BY country_name, year;
+  s.country_iso3,
+  COALESCE(co.country_name, s.country_iso3) AS country_name,
+  COALESCE(co.region, 'Unknown') AS region_name,
+  s.year,
+  s.scenario_id,
+  s.is_forecast_year,
+  s.trajectory_score,
+  s.forecast_score_completeness,
+  s.assumption_flag,
+  co.region,
+  co.subregion,
+  co.income_group,
+  co.is_sovereign,
+  s.climate_vulnerability_projection_source,
+  s.climate_vulnerability_forecast_method
+FROM `{{ project }}.{{ dataset }}.gold__country_trajectory_score_year_scenario` s
+LEFT JOIN `{{ project }}.{{ dataset }}.country_overrides` co
+  ON s.country_iso3 = co.iso3
+WHERE s.scenario_id IN ('historical_observed', 'baseline_static_risk', 'baseline_ml_dynamic_risk')
+ORDER BY country_name, s.year, s.scenario_id;
 
 -- 4) Country component breakdown
 SELECT
-  country_iso3,
-  country_name,
-  year,
-  component,
-  component_score
-FROM `{{ project }}.{{ dataset }}.gold__trajectory_component_breakdown`
-ORDER BY country_name, year, component;
+  g.country_iso3,
+  COALESCE(co.country_name, g.country_iso3) AS country_name,
+  g.year,
+  g.scenario_id,
+  g.is_forecast_year,
+  g.component,
+  g.contribution_value AS value,
+  co.region,
+  co.subregion,
+  co.income_group,
+  co.is_sovereign
+FROM `{{ project }}.{{ dataset }}.gold__trajectory_component_breakdown` g
+LEFT JOIN `{{ project }}.{{ dataset }}.country_overrides` co
+  ON g.country_iso3 = co.iso3
+WHERE g.scenario_id IN ('historical_observed', 'baseline_static_risk', 'baseline_ml_dynamic_risk')
+ORDER BY country_name, g.year, g.scenario_id, g.component;
 
 -- 5) Quadrant counts for overview
 SELECT
-  quadrant,
+  quadrant_label AS quadrant,
   COUNT(DISTINCT country_name) AS country_count
 FROM `{{ project }}.{{ dataset }}.gold__trajectory_country_quadrant`
 WHERE is_rankable_forecast_case = TRUE
@@ -66,20 +79,22 @@ ORDER BY country_count DESC;
 SELECT
   rp.country_iso3,
   rp.country_name,
-  rp.region_name,
+  rp.region AS region_name,
+  rp.subregion,
+  rp.income_group,
   rp.trajectory_score_2023,
   rp.trajectory_score_2045,
   rp.trajectory_change_2023_2045,
   rp.rise_potential_score,
   m.momentum_score,
-  q.quadrant,
-  rp.is_rankable_forecast_case,
-  rp.is_sovereign
+  m.momentum_band,
+  rp.forecast_score_completeness,
+  q.quadrant_label AS quadrant
 FROM `{{ project }}.{{ dataset }}.gold__country_rise_potential` rp
 LEFT JOIN `{{ project }}.{{ dataset }}.gold__country_trajectory_momentum` m
-  USING (country_iso3, country_name, region_name)
+  USING (country_iso3, country_name, region, subregion, income_group)
 LEFT JOIN `{{ project }}.{{ dataset }}.gold__trajectory_country_quadrant` q
-  USING (country_iso3, country_name, region_name)
+  USING (country_iso3, country_name, region, subregion, income_group)
 ORDER BY rise_potential_score DESC;
 
 -- 7) Doomsday Clock input table

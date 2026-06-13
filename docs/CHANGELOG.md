@@ -222,3 +222,24 @@
   - optional scenario-delta exports
 - documented Sprint 4 delivery in:
   - `docs/ml_forecasting_sprint_4.md`
+
+## Phase 16 - ML Upgrade Sprint 4B (Dashboard Export Refresh and Validation)
+
+- refreshed `dashboard/data` extracts from BigQuery gold models for scenario-aware dashboard behavior
+- updated exports to include both forecast scenarios in dashboard-facing tables:
+  - `baseline_static_risk`
+  - `baseline_ml_dynamic_risk`
+- refreshed optional comparison extracts with non-empty data:
+  - `scenario_delta_summary.csv`
+  - `scenario_delta_country_2045.csv`
+- confirmed selector behavior:
+  - static baseline remains default
+  - ML dynamic risk is available as selectable forecast scenario
+- validated loader and page-level data paths for:
+  - global overview
+  - country explorer
+  - regional view
+  - scenario comparison section
+- attempted local Streamlit smoke test; runtime blocked in sandboxed environment due local socket bind restriction
+- documented Sprint 4B refresh and validation results in:
+  - `docs/ml_forecasting_sprint_4.md`

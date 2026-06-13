@@ -38,3 +38,35 @@ Country score export now supports projection metadata columns when available:
 - No changes to ML training code.
 - No changes to dbt scoring SQL.
 - No changes to seed artifacts or scenario logic.
+
+## Sprint 4B Export Refresh
+
+### Objective
+
+Refresh `dashboard/data` extracts so the Sprint 4 scenario selector can show
+both forecast scenarios and the comparison section can load non-empty data.
+
+### Export Outcome
+
+Refreshed CSV extracts now include:
+
+- forecast scenarios in dashboard datasets:
+  - `baseline_static_risk`
+  - `baseline_ml_dynamic_risk`
+- comparison datasets:
+  - `scenario_delta_summary.csv`
+  - `scenario_delta_country_2045.csv`
+
+### Validation Outcome
+
+- Dashboard loader detects both forecast scenarios.
+- Default scenario remains `baseline_static_risk`.
+- Comparison datasets are non-empty.
+- Full Streamlit runtime smoke test is blocked in this environment due local
+  socket bind restrictions (`PermissionError: [Errno 1] Operation not permitted`).
+- Loader-level and page-level validations passed.
+
+### Export Note
+
+When using `bq query` for file exports, set an explicit high `--max_rows`
+value (for example `--max_rows=500000`) to avoid silent truncation to 100 rows.

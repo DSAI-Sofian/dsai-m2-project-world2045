@@ -40,3 +40,8 @@ Forecast scenario behavior in dashboard:
 - Historical rows (`historical_observed`) are retained and shown together with the selected forecast scenario.
 
 Use the SQL in `/sql/export_queries.sql` to create the extracts.
+
+## Export refresh tip
+
+If you export with `bq query`, set a high `--max_rows` value (for example
+`--max_rows=500000`) so files are not truncated to the default preview limit.
