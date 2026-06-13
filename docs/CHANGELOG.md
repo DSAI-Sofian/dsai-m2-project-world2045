@@ -243,3 +243,26 @@
 - attempted local Streamlit smoke test; runtime blocked in sandboxed environment due local socket bind restriction
 - documented Sprint 4B refresh and validation results in:
   - `docs/ml_forecasting_sprint_4.md`
+
+## Phase 17 - ML Upgrade Sprint 5 (Documentation and Demo Pack)
+
+- prepared management-facing summary:
+  - `docs/world2045_ml_upgrade_executive_summary.md`
+- prepared technical completion report:
+  - `docs/world2045_ml_upgrade_technical_completion.md`
+- prepared non-technical demo walkthrough:
+  - `docs/world2045_ml_demo_walkthrough.md`
+- added model governance artifacts:
+  - `docs/ml_model_card_climate_vulnerability.md`
+  - `docs/ml_forecasting_methodology.md`
+- added audit checklist for release and governance sign-off:
+  - `docs/world2045_ml_upgrade_audit_checklist.md`
+- updated dashboard README with:
+  - export refresh guidance
+  - scenario switching instructions
+  - scenario delta interpretation guidance
+- documented limitations and future-work framing:
+  - climate is the only ML-integrated indicator in current release
+  - governance/adaptation remain carry-forward
+  - conflict remains deferred
+  - ML scenario is comparative, not definitive
